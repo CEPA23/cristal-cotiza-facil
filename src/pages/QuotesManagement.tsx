@@ -1,18 +1,20 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Calendar, User, DollarSign, Eye, Edit3 } from 'lucide-react';
+import { ArrowLeft, Calendar, User, DollarSign, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Quote } from '@/pages/Index';
 import { useToast } from '@/hooks/use-toast';
+import { QuoteDetail } from '@/components/QuoteDetail';
 
 const QuotesManagement = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [filteredQuotes, setFilteredQuotes] = useState<Quote[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -68,6 +70,16 @@ const QuotesManagement = () => {
 
   const getTotalQuotesByStatus = (status: Quote['status']) => {
     return quotes.filter(quote => quote.status === status).length;
+  };
+
+  const handleViewQuote = (quote: Quote) => {
+    setSelectedQuote(quote);
+    setIsDetailOpen(true);
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailOpen(false);
+    setSelectedQuote(null);
   };
 
   return (
@@ -163,9 +175,20 @@ const QuotesManagement = () => {
                         </div>
                       </div>
                     </div>
-                    <Badge className={getStatusColor(quote.status)}>
-                      {quote.status}
-                    </Badge>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        onClick={() => handleViewQuote(quote)}
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Ver Resumen
+                      </Button>
+                      <Badge className={getStatusColor(quote.status)}>
+                        {quote.status}
+                      </Badge>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -218,6 +241,12 @@ const QuotesManagement = () => {
           )}
         </div>
       </div>
+
+      <QuoteDetail 
+        quote={selectedQuote}
+        isOpen={isDetailOpen}
+        onClose={handleCloseDetail}
+      />
     </div>
   );
 };
