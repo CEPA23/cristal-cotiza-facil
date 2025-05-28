@@ -38,6 +38,8 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
   const [unitOpen, setUnitOpen] = useState(false);
   const [selectedType, setSelectedType] = useState('');
   const [selectedTypeName, setSelectedTypeName] = useState('');
+  const [customWidth, setCustomWidth] = useState('');
+  const [customHeight, setCustomHeight] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [unitOfMeasure, setUnitOfMeasure] = useState('');
   const [price, setPrice] = useState('');
@@ -45,12 +47,15 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
   const addProduct = () => {
     if (!selectedType || !unitOfMeasure || !price) return;
 
+    const width = parseFloat(customWidth) || 1;
+    const height = parseFloat(customHeight) || 1;
+
     const newProduct: Product = {
       id: `${Date.now()}-${Math.random()}`,
       name: selectedTypeName,
       basePrice: parseFloat(price),
-      width: 1,
-      height: 1,
+      width,
+      height,
       quantity: parseInt(quantity),
       customSize: true,
       unitOfMeasure
@@ -61,6 +66,8 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
     // Reset form
     setSelectedType('');
     setSelectedTypeName('');
+    setCustomWidth('');
+    setCustomHeight('');
     setQuantity('1');
     setUnitOfMeasure('');
     setPrice('');
@@ -71,7 +78,8 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
   };
 
   const calculateProductPrice = (product: Product) => {
-    return product.basePrice * product.quantity;
+    const area = product.width * product.height;
+    return product.basePrice * area * product.quantity;
   };
 
   return (
@@ -167,6 +175,34 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
         </div>
 
         <div>
+          <Label htmlFor="width">Ancho (m)</Label>
+          <Input
+            id="width"
+            type="number"
+            step="0.1"
+            min="0.1"
+            max="10"
+            value={customWidth}
+            onChange={(e) => setCustomWidth(e.target.value)}
+            placeholder="Ej: 1.5"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="height">Alto (m)</Label>
+          <Input
+            id="height"
+            type="number"
+            step="0.1"
+            min="0.1"
+            max="10"
+            value={customHeight}
+            onChange={(e) => setCustomHeight(e.target.value)}
+            placeholder="Ej: 2.0"
+          />
+        </div>
+
+        <div>
           <Label htmlFor="quantity">Cantidad</Label>
           <Input
             id="quantity"
@@ -209,7 +245,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
                   <div className="flex-1">
                     <h4 className="font-medium">{product.name}</h4>
                     <p className="text-sm text-gray-600">
-                      Cantidad: {product.quantity} | {product.unitOfMeasure}
+                      {product.width}m x {product.height}m | Cantidad: {product.quantity} | {product.unitOfMeasure}
                     </p>
                     <p className="text-sm font-medium text-blue-600">
                       S/. {calculateProductPrice(product).toFixed(2)}
