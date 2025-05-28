@@ -1,17 +1,24 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Building2, Calendar, User, Phone, Mail, MapPin } from 'lucide-react';
+import { Building2, Calendar, User, Phone, Mail, MapPin, Truck } from 'lucide-react';
 import { Customer, Product } from '@/pages/Index';
 
 interface QuotePreviewProps {
   customer: Customer | null;
   products: Product[];
   total: number;
+  shippingService?: string;
+  shippingCost?: number;
 }
 
-export const QuotePreview: React.FC<QuotePreviewProps> = ({ customer, products, total }) => {
+export const QuotePreview: React.FC<QuotePreviewProps> = ({ 
+  customer, 
+  products, 
+  total, 
+  shippingService, 
+  shippingCost = 0 
+}) => {
   const currentDate = new Date().toLocaleDateString('es-PE', {
     weekday: 'long',
     year: 'numeric',
@@ -32,6 +39,8 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({ customer, products, 
       </div>
     );
   }
+
+  const subtotal = products.reduce((sum, product) => sum + calculateProductPrice(product), 0);
 
   return (
     <div className="space-y-4 text-sm">
@@ -129,13 +138,41 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({ customer, products, 
         </div>
       )}
 
+      {/* Shipping Services */}
+      {shippingService && (
+        <div>
+          <h3 className="font-semibold mb-3 flex items-center">
+            <Truck className="h-4 w-4 mr-2" />
+            SERVICIO DE ENVÍO
+          </h3>
+          <div className="bg-gray-50 p-3 rounded">
+            <div className="flex justify-between items-center">
+              <span>{shippingService}</span>
+              <span className="font-semibold">S/. {shippingCost.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Total */}
       {products.length > 0 && (
         <>
           <Separator />
-          <div className="flex justify-between items-center text-lg font-bold">
-            <span>TOTAL:</span>
-            <span className="text-blue-600">S/. {total.toFixed(2)}</span>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span>Subtotal:</span>
+              <span>S/. {subtotal.toFixed(2)}</span>
+            </div>
+            {shippingCost > 0 && (
+              <div className="flex justify-between items-center">
+                <span>Envío:</span>
+                <span>S/. {shippingCost.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between items-center text-lg font-bold border-t pt-2">
+              <span>TOTAL:</span>
+              <span className="text-blue-600">S/. {total.toFixed(2)}</span>
+            </div>
           </div>
         </>
       )}

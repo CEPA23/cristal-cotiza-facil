@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,7 @@ export interface Product {
   height: number;
   quantity: number;
   customSize?: boolean;
+  unitOfMeasure?: string;
 }
 
 export interface Customer {
@@ -35,12 +35,15 @@ export interface Quote {
   date: string;
   total: number;
   status: 'En espera' | 'Aprobado' | 'Rechazado';
+  rejectionReason?: string;
 }
 
 const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [shippingService, setShippingService] = useState('');
+  const [shippingCost, setShippingCost] = useState('0');
   const { toast } = useToast();
 
   const calculateTotal = () => {
@@ -49,6 +52,24 @@ const Index = () => {
       return total + (product.basePrice * area * product.quantity);
     }, 0);
   };
+
+  const getQuotesSummary = () => {
+    const quotes = JSON.parse(localStorage.getItem('quotes') || '[]') as Quote[];
+    const approved = quotes.filter(q => q.status === 'Aprobado').length;
+    const pending = quotes.filter(q => q.status === 'En espera').length;
+    const totalSales = quotes
+      .filter(q => q.status === 'Aprobado')
+      .reduce((sum, q) => sum + q.total, 0);
+    
+    return {
+      total: quotes.length,
+      approved,
+      pending,
+      totalSales
+    };
+  };
+
+  const summary = getQuotesSummary();
 
   const handleGenerateQuote = async () => {
     if (!customer || products.length === 0) {
@@ -122,6 +143,34 @@ const Index = () => {
           </div>
         </header>
 
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-2xl font-bold text-blue-600">{summary.total}</h3>
+              <p className="text-sm text-gray-600">Total Cotizaciones</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-2xl font-bold text-green-600">{summary.approved}</h3>
+              <p className="text-sm text-gray-600">Aprobadas</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-2xl font-bold text-yellow-600">{summary.pending}</h3>
+              <p className="text-sm text-gray-600">Pendientes</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-2xl font-bold text-purple-600">S/. {summary.totalSales.toFixed(2)}</h3>
+              <p className="text-sm text-gray-600">Total Ventas</p>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="space-y-6">
             <Card>
@@ -144,6 +193,35 @@ const Index = () => {
                 />
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Servicios de Envío</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="shipping-service">Tipo de Envío</Label>
+                  <Input
+                    id="shipping-service"
+                    value={shippingService}
+                    onChange={(e) => setShippingService(e.target.value)}
+                    placeholder="Ej: Delivery, Recojo en tienda, Envío a domicilio"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="shipping-cost">Costo de Envío (S/.)</Label>
+                  <Input
+                    id="shipping-cost"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={shippingCost}
+                    onChange={(e) => setShippingCost(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           <div className="space-y-6">
@@ -155,7 +233,9 @@ const Index = () => {
                 <QuotePreview 
                   customer={customer}
                   products={products}
-                  total={calculateTotal()}
+                  total={calculateTotal() + parseFloat(shippingCost || '0')}
+                  shippingService={shippingService}
+                  shippingCost={parseFloat(shippingCost || '0')}
                 />
               </CardContent>
             </Card>

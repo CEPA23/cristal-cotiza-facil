@@ -3,7 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Calendar, User, DollarSign, Eye } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Calendar, User, DollarSign, Eye, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Quote } from '@/pages/Index';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +18,9 @@ const QuotesManagement = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
+  const [quoteToReject, setQuoteToReject] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -38,9 +44,13 @@ const QuotesManagement = () => {
     }
   };
 
-  const updateQuoteStatus = (quoteId: string, newStatus: Quote['status']) => {
+  const updateQuoteStatus = (quoteId: string, newStatus: Quote['status'], reason?: string) => {
     const updatedQuotes = quotes.map(quote => 
-      quote.id === quoteId ? { ...quote, status: newStatus } : quote
+      quote.id === quoteId ? { 
+        ...quote, 
+        status: newStatus,
+        rejectionReason: newStatus === 'Rechazado' ? reason : undefined
+      } : quote
     );
     
     setQuotes(updatedQuotes);
@@ -72,6 +82,23 @@ const QuotesManagement = () => {
     return quotes.filter(quote => quote.status === status).length;
   };
 
+  const getQuotesSummary = () => {
+    const approved = quotes.filter(q => q.status === 'Aprobado').length;
+    const pending = quotes.filter(q => q.status === 'En espera').length;
+    const totalSales = quotes
+      .filter(q => q.status === 'Aprobado')
+      .reduce((sum, q) => sum + q.total, 0);
+    
+    return {
+      total: quotes.length,
+      approved,
+      pending,
+      totalSales
+    };
+  };
+
+  const summary = getQuotesSummary();
+
   const handleViewQuote = (quote: Quote) => {
     setSelectedQuote(quote);
     setIsDetailOpen(true);
@@ -80,6 +107,24 @@ const QuotesManagement = () => {
   const handleCloseDetail = () => {
     setIsDetailOpen(false);
     setSelectedQuote(null);
+  };
+
+  const handleStatusChange = (quoteId: string, newStatus: Quote['status']) => {
+    if (newStatus === 'Rechazado') {
+      setQuoteToReject(quoteId);
+      setIsRejectionDialogOpen(true);
+    } else {
+      updateQuoteStatus(quoteId, newStatus);
+    }
+  };
+
+  const handleRejectQuote = () => {
+    if (!quoteToReject || !rejectionReason.trim()) return;
+    
+    updateQuoteStatus(quoteToReject, 'Rechazado', rejectionReason);
+    setIsRejectionDialogOpen(false);
+    setRejectionReason('');
+    setQuoteToReject(null);
   };
 
   return (
@@ -100,26 +145,26 @@ const QuotesManagement = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <Card>
               <CardContent className="p-4 text-center">
-                <h3 className="text-2xl font-bold text-blue-600">{quotes.length}</h3>
+                <h3 className="text-2xl font-bold text-blue-600">{summary.total}</h3>
                 <p className="text-sm text-gray-600">Total Cotizaciones</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
-                <h3 className="text-2xl font-bold text-yellow-600">{getTotalQuotesByStatus('En espera')}</h3>
-                <p className="text-sm text-gray-600">En Espera</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <h3 className="text-2xl font-bold text-green-600">{getTotalQuotesByStatus('Aprobado')}</h3>
+                <h3 className="text-2xl font-bold text-green-600">{summary.approved}</h3>
                 <p className="text-sm text-gray-600">Aprobadas</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 text-center">
-                <h3 className="text-2xl font-bold text-red-600">{getTotalQuotesByStatus('Rechazado')}</h3>
-                <p className="text-sm text-gray-600">Rechazadas</p>
+                <h3 className="text-2xl font-bold text-yellow-600">{summary.pending}</h3>
+                <p className="text-sm text-gray-600">Pendientes</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 text-center">
+                <h3 className="text-2xl font-bold text-purple-600">S/. {summary.totalSales.toFixed(2)}</h3>
+                <p className="text-sm text-gray-600">Total Ventas</p>
               </CardContent>
             </Card>
           </div>
@@ -201,7 +246,7 @@ const QuotesManagement = () => {
                     <div className="flex space-x-2">
                       <Select
                         value={quote.status}
-                        onValueChange={(newStatus: Quote['status']) => updateQuoteStatus(quote.id, newStatus)}
+                        onValueChange={(newStatus: Quote['status']) => handleStatusChange(quote.id, newStatus)}
                       >
                         <SelectTrigger className="w-32">
                           <SelectValue />
@@ -228,6 +273,15 @@ const QuotesManagement = () => {
                     </div>
                   </div>
 
+                  {/* Rejection Reason */}
+                  {quote.status === 'Rechazado' && quote.rejectionReason && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
+                      <p className="text-sm text-red-800">
+                        <strong>Motivo del rechazo:</strong> {quote.rejectionReason}
+                      </p>
+                    </div>
+                  )}
+
                   {quote.status === 'Aprobado' && (
                     <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
                       <p className="text-sm text-green-800">
@@ -247,6 +301,48 @@ const QuotesManagement = () => {
         isOpen={isDetailOpen}
         onClose={handleCloseDetail}
       />
+
+      {/* Rejection Dialog */}
+      <Dialog open={isRejectionDialogOpen} onOpenChange={setIsRejectionDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Motivo del Rechazo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="rejection-reason">
+                Por favor, especifique el motivo del rechazo:
+              </Label>
+              <Textarea
+                id="rejection-reason"
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder="Ej: Precio muy alto, producto no disponible, especificaciones incorrectas..."
+                rows={4}
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsRejectionDialogOpen(false);
+                  setRejectionReason('');
+                  setQuoteToReject(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleRejectQuote}
+                disabled={!rejectionReason.trim()}
+              >
+                Rechazar Cotización
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

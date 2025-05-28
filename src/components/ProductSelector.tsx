@@ -3,26 +3,27 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trash2, Plus } from 'lucide-react';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Trash2, Plus, Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Product } from '@/pages/Index';
 
 const PRODUCT_TYPES = [
-  { id: 'templado', name: 'Vidrio Templado', basePrice: 45 },
-  { id: 'laminado', name: 'Vidrio Laminado', basePrice: 55 },
-  { id: 'espejo', name: 'Espejo', basePrice: 35 },
-  { id: 'flotado', name: 'Vidrio Flotado', basePrice: 25 },
-  { id: 'doble', name: 'Doble Vidrio Hermético', basePrice: 85 },
-  { id: 'acustico', name: 'Vidrio Acústico', basePrice: 95 },
+  { id: 'templado', name: 'Vidrio Templado' },
+  { id: 'laminado', name: 'Vidrio Laminado' },
+  { id: 'espejo', name: 'Espejo' },
+  { id: 'flotado', name: 'Vidrio Flotado' },
+  { id: 'doble', name: 'Doble Vidrio Hermético' },
+  { id: 'acustico', name: 'Vidrio Acústico' },
 ];
 
-const PRESET_SIZES = [
-  { label: '1.0 x 1.0 m', width: 1.0, height: 1.0 },
-  { label: '1.5 x 1.0 m', width: 1.5, height: 1.0 },
-  { label: '2.0 x 1.5 m', width: 2.0, height: 1.5 },
-  { label: '2.5 x 2.0 m', width: 2.5, height: 2.0 },
-  { label: 'Medidas personalizadas', width: 0, height: 0 },
+const UNIT_OF_MEASURE = [
+  { id: 'm2', name: 'Metro cuadrado (m²)' },
+  { id: 'ml', name: 'Metro lineal (ml)' },
+  { id: 'unidad', name: 'Unidad' },
+  { id: 'kg', name: 'Kilogramo (kg)' },
 ];
 
 interface ProductSelectorProps {
@@ -31,48 +32,42 @@ interface ProductSelectorProps {
 }
 
 export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onProductsChange }) => {
+  const [open, setOpen] = useState(false);
   const [selectedType, setSelectedType] = useState('');
-  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedTypeName, setSelectedTypeName] = useState('');
   const [customWidth, setCustomWidth] = useState('');
   const [customHeight, setCustomHeight] = useState('');
   const [quantity, setQuantity] = useState('1');
+  const [unitOfMeasure, setUnitOfMeasure] = useState('');
+  const [price, setPrice] = useState('');
 
   const addProduct = () => {
-    if (!selectedType || !selectedSize) return;
+    if (!selectedType || !unitOfMeasure || !price) return;
 
-    const productType = PRODUCT_TYPES.find(p => p.id === selectedType);
-    if (!productType) return;
-
-    let width, height;
-    if (selectedSize === 'custom') {
-      width = parseFloat(customWidth);
-      height = parseFloat(customHeight);
-      if (!width || !height) return;
-    } else {
-      const size = PRESET_SIZES.find(s => s.label === selectedSize);
-      if (!size) return;
-      width = size.width;
-      height = size.height;
-    }
+    const width = parseFloat(customWidth) || 1;
+    const height = parseFloat(customHeight) || 1;
 
     const newProduct: Product = {
       id: `${Date.now()}-${Math.random()}`,
-      name: productType.name,
-      basePrice: productType.basePrice,
+      name: selectedTypeName,
+      basePrice: parseFloat(price),
       width,
       height,
       quantity: parseInt(quantity),
-      customSize: selectedSize === 'custom'
+      customSize: true,
+      unitOfMeasure
     };
 
     onProductsChange([...products, newProduct]);
     
     // Reset form
     setSelectedType('');
-    setSelectedSize('');
+    setSelectedTypeName('');
     setCustomWidth('');
     setCustomHeight('');
     setQuantity('1');
+    setUnitOfMeasure('');
+    setPrice('');
   };
 
   const removeProduct = (id: string) => {
@@ -89,66 +84,119 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="product-type">Tipo de Producto</Label>
-          <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar producto" />
-            </SelectTrigger>
-            <SelectContent>
-              {PRODUCT_TYPES.map(type => (
-                <SelectItem key={type.id} value={type.id}>
-                  {type.name} - S/. {type.basePrice}/m²
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="w-full justify-between"
+              >
+                {selectedTypeName || "Seleccionar producto..."}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0">
+              <Command>
+                <CommandInput placeholder="Buscar producto..." />
+                <CommandList>
+                  <CommandEmpty>No se encontró el producto.</CommandEmpty>
+                  <CommandGroup>
+                    {PRODUCT_TYPES.map((type) => (
+                      <CommandItem
+                        key={type.id}
+                        value={type.name}
+                        onSelect={() => {
+                          setSelectedType(type.id);
+                          setSelectedTypeName(type.name);
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedType === type.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {type.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div>
-          <Label htmlFor="size">Tamaño</Label>
-          <Select value={selectedSize} onValueChange={setSelectedSize}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleccionar tamaño" />
-            </SelectTrigger>
-            <SelectContent>
-              {PRESET_SIZES.map(size => (
-                <SelectItem key={size.label} value={size.label === 'Medidas personalizadas' ? 'custom' : size.label}>
-                  {size.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Label htmlFor="unit">Unidad de Medida</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between"
+              >
+                {unitOfMeasure ? UNIT_OF_MEASURE.find(u => u.id === unitOfMeasure)?.name : "Seleccionar unidad..."}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full p-0">
+              <Command>
+                <CommandInput placeholder="Buscar unidad..." />
+                <CommandList>
+                  <CommandEmpty>No se encontró la unidad.</CommandEmpty>
+                  <CommandGroup>
+                    {UNIT_OF_MEASURE.map((unit) => (
+                      <CommandItem
+                        key={unit.id}
+                        value={unit.name}
+                        onSelect={() => {
+                          setUnitOfMeasure(unit.id);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            unitOfMeasure === unit.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {unit.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
-        {selectedSize === 'custom' && (
-          <>
-            <div>
-              <Label htmlFor="width">Ancho (m)</Label>
-              <Input
-                id="width"
-                type="number"
-                step="0.1"
-                min="0.1"
-                max="10"
-                value={customWidth}
-                onChange={(e) => setCustomWidth(e.target.value)}
-                placeholder="Ej: 1.5"
-              />
-            </div>
-            <div>
-              <Label htmlFor="height">Alto (m)</Label>
-              <Input
-                id="height"
-                type="number"
-                step="0.1"
-                min="0.1"
-                max="10"
-                value={customHeight}
-                onChange={(e) => setCustomHeight(e.target.value)}
-                placeholder="Ej: 2.0"
-              />
-            </div>
-          </>
-        )}
+        <div>
+          <Label htmlFor="width">Ancho (m)</Label>
+          <Input
+            id="width"
+            type="number"
+            step="0.1"
+            min="0.1"
+            max="10"
+            value={customWidth}
+            onChange={(e) => setCustomWidth(e.target.value)}
+            placeholder="Ej: 1.5"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="height">Alto (m)</Label>
+          <Input
+            id="height"
+            type="number"
+            step="0.1"
+            min="0.1"
+            max="10"
+            value={customHeight}
+            onChange={(e) => setCustomHeight(e.target.value)}
+            placeholder="Ej: 2.0"
+          />
+        </div>
 
         <div>
           <Label htmlFor="quantity">Cantidad</Label>
@@ -162,12 +210,25 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
           />
         </div>
 
-        <div className="flex items-end">
-          <Button onClick={addProduct} className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
-            Añadir Producto
-          </Button>
+        <div>
+          <Label htmlFor="price">Precio (S/.)</Label>
+          <Input
+            id="price"
+            type="number"
+            step="0.01"
+            min="0"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            placeholder="Ej: 45.50"
+          />
         </div>
+      </div>
+
+      <div className="flex items-end">
+        <Button onClick={addProduct} className="w-full">
+          <Plus className="h-4 w-4 mr-2" />
+          Añadir Producto
+        </Button>
       </div>
 
       {products.length > 0 && (
@@ -180,7 +241,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
                   <div className="flex-1">
                     <h4 className="font-medium">{product.name}</h4>
                     <p className="text-sm text-gray-600">
-                      {product.width}m x {product.height}m | Cantidad: {product.quantity}
+                      {product.width}m x {product.height}m | Cantidad: {product.quantity} | {product.unitOfMeasure}
                     </p>
                     <p className="text-sm font-medium text-blue-600">
                       S/. {calculateProductPrice(product).toFixed(2)}
