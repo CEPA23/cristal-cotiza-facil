@@ -1,88 +1,66 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, Calendar, User, DollarSign, Eye, X, AlertCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Quote } from '@/pages/Index';
-import { useToast } from '@/hooks/use-toast';
 import { QuoteDetail } from '@/components/QuoteDetail';
+import { useToast } from '@/hooks/use-toast';
+import { Building2, ArrowLeft, Eye, MessageSquare, CheckCircle, XCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Quote } from './Index';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 const QuotesManagement = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [filteredQuotes, setFilteredQuotes] = useState<Quote[]>([]);
-  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [showRejectionDialog, setShowRejectionDialog] = useState<Quote | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
-  const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
-  const [quoteToReject, setQuoteToReject] = useState<string | null>(null);
-  const [viewingRejectionReason, setViewingRejectionReason] = useState<string>('');
-  const [isViewingRejectionOpen, setIsViewingRejectionOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     loadQuotes();
   }, []);
 
-  useEffect(() => {
-    filterQuotes();
-  }, [quotes, statusFilter]);
-
   const loadQuotes = () => {
-    const storedQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
-    // Already ordered newest first from Index.tsx
-    setQuotes(storedQuotes);
+    const savedQuotes = JSON.parse(localStorage.getItem('quotes') || '[]') as Quote[];
+    setQuotes(savedQuotes);
   };
 
-  const filterQuotes = () => {
-    if (statusFilter === 'all') {
-      setFilteredQuotes(quotes);
-    } else {
-      setFilteredQuotes(quotes.filter(quote => quote.status === statusFilter));
-    }
-  };
-
-  const updateQuoteStatus = (quoteId: string, newStatus: Quote['status'], reason?: string) => {
+  const updateQuoteStatus = (quoteId: string, status: Quote['status'], reason?: string) => {
     const updatedQuotes = quotes.map(quote => 
-      quote.id === quoteId ? { 
-        ...quote, 
-        status: newStatus,
-        rejectionReason: newStatus === 'Rechazado' ? reason : undefined
-      } : quote
+      quote.id === quoteId 
+        ? { ...quote, status, rejectionReason: reason } 
+        : quote
     );
-    
     setQuotes(updatedQuotes);
     localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
     
     toast({
       title: "Estado actualizado",
-      description: `Cotización ${quoteId} marcada como ${newStatus.toLowerCase()}.`,
+      description: `Cotización ${status.toLowerCase()}`,
     });
+  };
 
-    if (newStatus === 'Aprobado') {
-      toast({
-        title: "Cotización aprobada",
-        description: "Los datos están listos para la fase de producción.",
-      });
+  const handleReject = (quote: Quote) => {
+    setShowRejectionDialog(quote);
+  };
+
+  const confirmReject = () => {
+    if (showRejectionDialog && rejectionReason.trim()) {
+      updateQuoteStatus(showRejectionDialog.id, 'Rechazado', rejectionReason);
+      setShowRejectionDialog(null);
+      setRejectionReason('');
     }
   };
 
   const getStatusColor = (status: Quote['status']) => {
     switch (status) {
-      case 'En espera': return 'bg-yellow-100 text-yellow-800';
-      case 'Aprobado': return 'bg-green-100 text-green-800';
-      case 'Rechazado': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Aprobado': return 'bg-green-500';
+      case 'Rechazado': return 'bg-red-500';
+      default: return 'bg-yellow-500';
     }
-  };
-
-  const getTotalQuotesByStatus = (status: Quote['status']) => {
-    return quotes.filter(quote => quote.status === status).length;
   };
 
   const getQuotesSummary = () => {
@@ -102,288 +80,189 @@ const QuotesManagement = () => {
 
   const summary = getQuotesSummary();
 
-  const handleViewQuote = (quote: Quote) => {
-    setSelectedQuote(quote);
-    setIsDetailOpen(true);
-  };
-
-  const handleCloseDetail = () => {
-    setIsDetailOpen(false);
-    setSelectedQuote(null);
-  };
-
-  const handleStatusChange = (quoteId: string, newStatus: Quote['status']) => {
-    if (newStatus === 'Rechazado') {
-      setQuoteToReject(quoteId);
-      setIsRejectionDialogOpen(true);
-    } else {
-      updateQuoteStatus(quoteId, newStatus);
-    }
-  };
-
-  const handleRejectQuote = () => {
-    if (!quoteToReject || !rejectionReason.trim()) return;
-    
-    updateQuoteStatus(quoteToReject, 'Rechazado', rejectionReason);
-    setIsRejectionDialogOpen(false);
-    setRejectionReason('');
-    setQuoteToReject(null);
-  };
-
-  const handleViewRejectionReason = (reason: string) => {
-    setViewingRejectionReason(reason);
-    setIsViewingRejectionOpen(true);
-  };
+  if (selectedQuote) {
+    return <QuoteDetail quote={selectedQuote} onBack={() => setSelectedQuote(null)} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-8">
-        <header className="mb-8">
-          <div className="flex items-center mb-4">
-            <Link to="/">
-              <Button variant="outline" size="sm" className="mr-4">
+        <header className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <Link to="/" className="mr-4">
+              <Button variant="outline" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Volver
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold text-gray-800">Gestión de Cotizaciones</h1>
-          </div>
-          
-          {/* Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardContent className="p-4 text-center">
-                <h3 className="text-2xl font-bold text-blue-600">{summary.total}</h3>
-                <p className="text-sm text-gray-600">Total Cotizaciones</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <h3 className="text-2xl font-bold text-green-600">{summary.approved}</h3>
-                <p className="text-sm text-gray-600">Aprobadas</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <h3 className="text-2xl font-bold text-yellow-600">{summary.pending}</h3>
-                <p className="text-sm text-gray-600">Pendientes</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 text-center">
-                <h3 className="text-2xl font-bold text-purple-600">S/. {summary.totalSales.toFixed(2)}</h3>
-                <p className="text-sm text-gray-600">Total Ventas</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Filter */}
-          <div className="flex justify-between items-center">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="Filtrar por estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas las cotizaciones</SelectItem>
-                <SelectItem value="En espera">En espera</SelectItem>
-                <SelectItem value="Aprobado">Aprobadas</SelectItem>
-                <SelectItem value="Rechazado">Rechazadas</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex items-center">
+              <Building2 className="h-8 w-8 text-blue-600 mr-3" />
+              <h1 className="text-3xl font-bold text-gray-800">Gestión de Cotizaciones</h1>
+            </div>
           </div>
         </header>
 
-        {/* Quotes List */}
-        <div className="space-y-4">
-          {filteredQuotes.length === 0 ? (
-            <Card>
-              <CardContent className="p-8 text-center text-gray-500">
-                <p>No hay cotizaciones que mostrar.</p>
-                <Link to="/">
-                  <Button className="mt-4">
-                    Crear Nueva Cotización
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          ) : (
-            filteredQuotes.map(quote => (
-              <Card key={quote.id}>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-2xl font-bold text-blue-600">{summary.total}</h3>
+              <p className="text-sm text-gray-600">Total Cotizaciones</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-2xl font-bold text-green-600">{summary.approved}</h3>
+              <p className="text-sm text-gray-600">Aprobadas</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-2xl font-bold text-yellow-600">{summary.pending}</h3>
+              <p className="text-sm text-gray-600">Pendientes</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4 text-center">
+              <h3 className="text-2xl font-bold text-purple-600">S/. {summary.totalSales.toFixed(2)}</h3>
+              <p className="text-sm text-gray-600">Total Ventas</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {quotes.length === 0 ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <p className="text-gray-500 text-lg">No hay cotizaciones disponibles</p>
+              <Link to="/">
+                <Button className="mt-4">Crear Primera Cotización</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6">
+            {quotes.map(quote => (
+              <Card key={quote.id} className="hover:shadow-lg transition-shadow">
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-lg">{quote.id}</CardTitle>
-                      <div className="flex items-center mt-2 space-x-4 text-sm text-gray-600">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          {quote.date}
-                        </div>
-                        <div className="flex items-center">
-                          <User className="h-4 w-4 mr-1" />
-                          {quote.customer.name}
-                        </div>
-                        <div className="flex items-center">
-                          <DollarSign className="h-4 w-4 mr-1" />
-                          S/. {quote.total.toFixed(2)}
-                        </div>
-                      </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Cliente: {quote.customer.name} | Fecha: {quote.date}
+                      </p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        onClick={() => handleViewQuote(quote)}
-                        size="sm"
-                        variant="outline"
-                        className="flex items-center"
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Ver Resumen
-                      </Button>
-                      {quote.status === 'Rechazado' && quote.rejectionReason && (
-                        <Button
-                          onClick={() => handleViewRejectionReason(quote.rejectionReason!)}
-                          size="sm"
-                          variant="outline"
-                          className="flex items-center text-red-600"
-                        >
-                          <AlertCircle className="h-4 w-4 mr-1" />
-                          Ver Motivo
-                        </Button>
-                      )}
-                      <Badge className={getStatusColor(quote.status)}>
-                        {quote.status}
-                      </Badge>
-                    </div>
+                    <Badge className={`${getStatusColor(quote.status)} text-white`}>
+                      {quote.status}
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="flex justify-between items-center">
-                    <div className="text-sm text-gray-600">
-                      <p><strong>Cliente:</strong> {quote.customer.name}</p>
-                      <p><strong>DNI/RUC:</strong> {quote.customer.dni}</p>
-                      <p><strong>Productos:</strong> {quote.products.length} item{quote.products.length > 1 ? 's' : ''}</p>
+                    <div>
+                      <p className="text-lg font-semibold text-blue-600">
+                        Total: S/. {quote.total.toFixed(2)}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Productos: {quote.products.length}
+                      </p>
                     </div>
-                    <div className="flex space-x-2">
-                      <Select
-                        value={quote.status}
-                        onValueChange={(newStatus: Quote['status']) => handleStatusChange(quote.id, newStatus)}
+                    <div className="flex gap-2">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() => setSelectedQuote(quote)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                       >
-                        <SelectTrigger className="w-32">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="En espera">En espera</SelectItem>
-                          <SelectItem value="Aprobado">Aprobado</SelectItem>
-                          <SelectItem value="Rechazado">Rechazado</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver Cotización
+                      </Button>
+                      {quote.status === 'En espera' && (
+                        <>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateQuoteStatus(quote.id, 'Aprobado')}
+                            className="text-green-600 border-green-600 hover:bg-green-50"
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Aprobar
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleReject(quote)}
+                            className="text-red-600 border-red-600 hover:bg-red-50"
+                          >
+                            <XCircle className="h-4 w-4 mr-1" />
+                            Rechazar
+                          </Button>
+                        </>
+                      )}
+                      {quote.status === 'Rechazado' && quote.rejectionReason && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            toast({
+                              title: "Motivo del rechazo",
+                              description: quote.rejectionReason,
+                            });
+                          }}
+                          className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                        >
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          Ver Motivo
+                        </Button>
+                      )}
                     </div>
                   </div>
-
-                  {/* Products Summary */}
-                  <div className="mt-4 pt-4 border-t">
-                    <h4 className="font-medium mb-2">Productos cotizados:</h4>
-                    <div className="space-y-1">
-                      {quote.products.map((product, index) => (
-                        <div key={index} className="text-sm text-gray-600 flex justify-between">
-                          <span>{product.name} ({product.width}m × {product.height}m)</span>
-                          <span>Cant: {product.quantity}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Rejection Reason */}
-                  {quote.status === 'Rechazado' && quote.rejectionReason && (
-                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
-                      <p className="text-sm text-red-800">
-                        <strong>Motivo del rechazo:</strong> {quote.rejectionReason}
-                      </p>
-                    </div>
-                  )}
-
-                  {quote.status === 'Aprobado' && (
-                    <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
-                      <p className="text-sm text-green-800">
-                        ✅ <strong>Cotización aprobada</strong> - Lista para fase de producción
-                      </p>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
+
+        {/* Rejection Dialog */}
+        {showRejectionDialog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-md mx-4">
+              <CardHeader>
+                <CardTitle>Rechazar Cotización</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="rejection-reason">Motivo del rechazo</Label>
+                  <Textarea
+                    id="rejection-reason"
+                    value={rejectionReason}
+                    onChange={(e) => setRejectionReason(e.target.value)}
+                    placeholder="Explica el motivo del rechazo..."
+                    rows={4}
+                  />
+                </div>
+                <div className="flex gap-2 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowRejectionDialog(null);
+                      setRejectionReason('');
+                    }}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={confirmReject}
+                    disabled={!rejectionReason.trim()}
+                  >
+                    Rechazar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
-
-      <QuoteDetail 
-        quote={selectedQuote}
-        isOpen={isDetailOpen}
-        onClose={handleCloseDetail}
-      />
-
-      {/* Rejection Dialog */}
-      <Dialog open={isRejectionDialogOpen} onOpenChange={setIsRejectionDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Motivo del Rechazo</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="rejection-reason">
-                Por favor, especifique el motivo del rechazo:
-              </Label>
-              <Textarea
-                id="rejection-reason"
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="Ej: Precio muy alto, producto no disponible, especificaciones incorrectas..."
-                rows={4}
-              />
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsRejectionDialogOpen(false);
-                  setRejectionReason('');
-                  setQuoteToReject(null);
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={handleRejectQuote}
-                disabled={!rejectionReason.trim()}
-              >
-                Rechazar Cotización
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* View Rejection Reason Dialog */}
-      <Dialog open={isViewingRejectionOpen} onOpenChange={setIsViewingRejectionOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Motivo del Rechazo</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="p-4 bg-red-50 border border-red-200 rounded">
-              <p className="text-red-800">{viewingRejectionReason}</p>
-            </div>
-            <div className="flex justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setIsViewingRejectionOpen(false)}
-              >
-                Cerrar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

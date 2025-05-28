@@ -51,8 +51,7 @@ const Index = () => {
 
   const calculateTotal = () => {
     return products.reduce((total, product) => {
-      const area = product.width * product.height;
-      return total + (product.basePrice * area * product.quantity);
+      return total + (product.basePrice * product.quantity);
     }, 0);
   };
 
@@ -103,7 +102,14 @@ const Index = () => {
 
       toast({
         title: "Cotización generada",
-        description: `Cotización ${quote.id} creada exitosamente.`,
+        description: (
+          <div 
+            className="cursor-pointer hover:underline"
+            onClick={() => window.location.href = '/quotes'}
+          >
+            Cotización {quote.id} creada exitosamente. Haz clic aquí para ver todas las cotizaciones.
+          </div>
+        ),
       });
 
       // Clear form data
