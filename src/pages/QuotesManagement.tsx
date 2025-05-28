@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Calendar, User, DollarSign, Eye, X } from 'lucide-react';
+import { ArrowLeft, Calendar, User, DollarSign, Eye, X, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Quote } from '@/pages/Index';
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +21,8 @@ const QuotesManagement = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
   const [quoteToReject, setQuoteToReject] = useState<string | null>(null);
+  const [viewingRejectionReason, setViewingRejectionReason] = useState<string>('');
+  const [isViewingRejectionOpen, setIsViewingRejectionOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -33,6 +35,7 @@ const QuotesManagement = () => {
 
   const loadQuotes = () => {
     const storedQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
+    // Already ordered newest first from Index.tsx
     setQuotes(storedQuotes);
   };
 
@@ -125,6 +128,11 @@ const QuotesManagement = () => {
     setIsRejectionDialogOpen(false);
     setRejectionReason('');
     setQuoteToReject(null);
+  };
+
+  const handleViewRejectionReason = (reason: string) => {
+    setViewingRejectionReason(reason);
+    setIsViewingRejectionOpen(true);
   };
 
   return (
@@ -230,6 +238,17 @@ const QuotesManagement = () => {
                         <Eye className="h-4 w-4 mr-1" />
                         Ver Resumen
                       </Button>
+                      {quote.status === 'Rechazado' && quote.rejectionReason && (
+                        <Button
+                          onClick={() => handleViewRejectionReason(quote.rejectionReason!)}
+                          size="sm"
+                          variant="outline"
+                          className="flex items-center text-red-600"
+                        >
+                          <AlertCircle className="h-4 w-4 mr-1" />
+                          Ver Motivo
+                        </Button>
+                      )}
                       <Badge className={getStatusColor(quote.status)}>
                         {quote.status}
                       </Badge>
@@ -338,6 +357,28 @@ const QuotesManagement = () => {
                 disabled={!rejectionReason.trim()}
               >
                 Rechazar Cotización
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Rejection Reason Dialog */}
+      <Dialog open={isViewingRejectionOpen} onOpenChange={setIsViewingRejectionOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Motivo del Rechazo</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-red-50 border border-red-200 rounded">
+              <p className="text-red-800">{viewingRejectionReason}</p>
+            </div>
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setIsViewingRejectionOpen(false)}
+              >
+                Cerrar
               </Button>
             </div>
           </div>

@@ -20,9 +20,11 @@ const PRODUCT_TYPES = [
 ];
 
 const UNIT_OF_MEASURE = [
+  { id: 'unidad', name: 'Unidad' },
+  { id: 'docena', name: 'Docena' },
+  { id: 'caja', name: 'Caja' },
   { id: 'm2', name: 'Metro cuadrado (m²)' },
   { id: 'ml', name: 'Metro lineal (ml)' },
-  { id: 'unidad', name: 'Unidad' },
   { id: 'kg', name: 'Kilogramo (kg)' },
 ];
 
@@ -33,6 +35,7 @@ interface ProductSelectorProps {
 
 export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onProductsChange }) => {
   const [open, setOpen] = useState(false);
+  const [unitOpen, setUnitOpen] = useState(false);
   const [selectedType, setSelectedType] = useState('');
   const [selectedTypeName, setSelectedTypeName] = useState('');
   const [customWidth, setCustomWidth] = useState('');
@@ -130,7 +133,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
 
         <div>
           <Label htmlFor="unit">Unidad de Medida</Label>
-          <Popover>
+          <Popover open={unitOpen} onOpenChange={setUnitOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -152,6 +155,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
                         value={unit.name}
                         onSelect={() => {
                           setUnitOfMeasure(unit.id);
+                          setUnitOpen(false);
                         }}
                       >
                         <Check

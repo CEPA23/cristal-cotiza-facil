@@ -93,19 +93,24 @@ const Index = () => {
         customer,
         products,
         date: new Date().toLocaleDateString('es-PE'),
-        total: calculateTotal(),
+        total: calculateTotal() + parseFloat(shippingCost || '0'),
         status: 'En espera'
       };
 
-      // Guardar en localStorage
+      // Guardar en localStorage - newest first
       const existingQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
-      localStorage.setItem('quotes', JSON.stringify([...existingQuotes, quote]));
+      localStorage.setItem('quotes', JSON.stringify([quote, ...existingQuotes]));
 
       toast({
         title: "Cotización generada",
         description: `Cotización ${quote.id} creada exitosamente.`,
       });
 
+      // Clear form data
+      setProducts([]);
+      setCustomer(null);
+      setShippingService('');
+      setShippingCost('0');
       setIsGeneratingPDF(false);
     }, 2000);
   };
@@ -181,7 +186,7 @@ const Index = () => {
                 <CardTitle>Datos del Cliente</CardTitle>
               </CardHeader>
               <CardContent>
-                <CustomerForm onCustomerSelect={setCustomer} />
+                <CustomerForm onCustomerSelect={setCustomer} key={customer?.dni || 'empty'} />
               </CardContent>
             </Card>
 
