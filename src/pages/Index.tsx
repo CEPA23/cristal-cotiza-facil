@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,8 +50,7 @@ const Index = () => {
 
   const calculateTotal = () => {
     return products.reduce((total, product) => {
-      const area = product.width * product.height;
-      return total + (product.basePrice * area * product.quantity);
+      return total + (product.basePrice * product.quantity);
     }, 0);
   };
 
@@ -104,6 +102,13 @@ const Index = () => {
       toast({
         title: "Cotización generada",
         description: `Cotización ${quote.id} creada exitosamente.`,
+        action: (
+          <Link to="/quotes">
+            <Button variant="outline" size="sm" className="text-blue-600 border-blue-300 hover:bg-blue-50">
+              Ver Cotizaciones
+            </Button>
+          </Link>
+        ),
       });
 
       // Clear form data
@@ -144,7 +149,7 @@ const Index = () => {
           <p className="text-xl text-gray-600">Vidriería Profesional</p>
           <div className="mt-4">
             <Link to="/quotes">
-              <Button variant="outline" className="mr-4">
+              <Button variant="outline" className="mr-4 bg-white hover:bg-gray-50 border-gray-300 text-gray-700 font-medium px-6 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
                 Ver Cotizaciones
               </Button>
             </Link>
@@ -153,25 +158,25 @@ const Index = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
+          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
             <CardContent className="p-4 text-center">
               <h3 className="text-2xl font-bold text-blue-600">{summary.total}</h3>
               <p className="text-sm text-gray-600">Total Cotizaciones</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
             <CardContent className="p-4 text-center">
               <h3 className="text-2xl font-bold text-green-600">{summary.approved}</h3>
               <p className="text-sm text-gray-600">Aprobadas</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
             <CardContent className="p-4 text-center">
               <h3 className="text-2xl font-bold text-yellow-600">{summary.pending}</h3>
               <p className="text-sm text-gray-600">Pendientes</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
             <CardContent className="p-4 text-center">
               <h3 className="text-2xl font-bold text-purple-600">S/. {summary.totalSales.toFixed(2)}</h3>
               <p className="text-sm text-gray-600">Total Ventas</p>
@@ -181,7 +186,7 @@ const Index = () => {
 
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <Card>
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
               <CardHeader>
                 <CardTitle>Datos del Cliente</CardTitle>
               </CardHeader>
@@ -190,7 +195,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
               <CardHeader>
                 <CardTitle>Selección de Productos</CardTitle>
               </CardHeader>
@@ -202,7 +207,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
               <CardHeader>
                 <CardTitle>Servicios de Envío</CardTitle>
               </CardHeader>
@@ -214,6 +219,7 @@ const Index = () => {
                     value={shippingService}
                     onChange={(e) => setShippingService(e.target.value)}
                     placeholder="Ej: Delivery, Recojo en tienda, Envío a domicilio"
+                    className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </div>
                 <div>
@@ -226,6 +232,7 @@ const Index = () => {
                     value={shippingCost}
                     onChange={(e) => setShippingCost(e.target.value)}
                     placeholder="0.00"
+                    className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </div>
               </CardContent>
@@ -233,7 +240,7 @@ const Index = () => {
           </div>
 
           <div className="space-y-6">
-            <Card>
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
               <CardHeader>
                 <CardTitle>Vista Previa de Cotización</CardTitle>
               </CardHeader>
@@ -248,14 +255,14 @@ const Index = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
               <CardHeader>
                 <CardTitle>Acciones</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Button 
                   onClick={handleGenerateQuote}
-                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
                   disabled={isGeneratingPDF}
                 >
                   {isGeneratingPDF ? 'Generando...' : 'Generar Cotización'}
@@ -267,6 +274,7 @@ const Index = () => {
                     size="sm"
                     onClick={handleDownloadPDF}
                     disabled={!customer || products.length === 0}
+                    className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700 transition-all duration-200 hover:shadow-md"
                   >
                     <Download className="h-4 w-4 mr-1" />
                     Descargar
@@ -276,6 +284,7 @@ const Index = () => {
                     size="sm"
                     onClick={handlePrintPDF}
                     disabled={!customer || products.length === 0}
+                    className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700 transition-all duration-200 hover:shadow-md"
                   >
                     <Printer className="h-4 w-4 mr-1" />
                     Imprimir
@@ -285,6 +294,7 @@ const Index = () => {
                     size="sm"
                     onClick={handleSendWhatsApp}
                     disabled={!customer || products.length === 0}
+                    className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700 transition-all duration-200 hover:shadow-md"
                   >
                     <MessageSquare className="h-4 w-4 mr-1" />
                     WhatsApp

@@ -38,8 +38,6 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
   const [unitOpen, setUnitOpen] = useState(false);
   const [selectedType, setSelectedType] = useState('');
   const [selectedTypeName, setSelectedTypeName] = useState('');
-  const [customWidth, setCustomWidth] = useState('');
-  const [customHeight, setCustomHeight] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [unitOfMeasure, setUnitOfMeasure] = useState('');
   const [price, setPrice] = useState('');
@@ -47,15 +45,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
   const addProduct = () => {
     if (!selectedType || !unitOfMeasure || !price) return;
 
-    const width = parseFloat(customWidth) || 1;
-    const height = parseFloat(customHeight) || 1;
-
     const newProduct: Product = {
       id: `${Date.now()}-${Math.random()}`,
       name: selectedTypeName,
       basePrice: parseFloat(price),
-      width,
-      height,
+      width: 1,
+      height: 1,
       quantity: parseInt(quantity),
       customSize: true,
       unitOfMeasure
@@ -66,8 +61,6 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
     // Reset form
     setSelectedType('');
     setSelectedTypeName('');
-    setCustomWidth('');
-    setCustomHeight('');
     setQuantity('1');
     setUnitOfMeasure('');
     setPrice('');
@@ -78,8 +71,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
   };
 
   const calculateProductPrice = (product: Product) => {
-    const area = product.width * product.height;
-    return product.basePrice * area * product.quantity;
+    return product.basePrice * product.quantity;
   };
 
   return (
@@ -93,13 +85,13 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
                 variant="outline"
                 role="combobox"
                 aria-expanded={open}
-                className="w-full justify-between"
+                className="w-full justify-between bg-white hover:bg-gray-50 border-gray-300 transition-all duration-200"
               >
                 {selectedTypeName || "Seleccionar producto..."}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full p-0">
+            <PopoverContent className="w-full p-0 bg-white shadow-lg border border-gray-200">
               <Command>
                 <CommandInput placeholder="Buscar producto..." />
                 <CommandList>
@@ -137,13 +129,13 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full justify-between"
+                className="w-full justify-between bg-white hover:bg-gray-50 border-gray-300 transition-all duration-200"
               >
                 {unitOfMeasure ? UNIT_OF_MEASURE.find(u => u.id === unitOfMeasure)?.name : "Seleccionar unidad..."}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full p-0">
+            <PopoverContent className="w-full p-0 bg-white shadow-lg border border-gray-200">
               <Command>
                 <CommandInput placeholder="Buscar unidad..." />
                 <CommandList>
@@ -175,34 +167,6 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
         </div>
 
         <div>
-          <Label htmlFor="width">Ancho (m)</Label>
-          <Input
-            id="width"
-            type="number"
-            step="0.1"
-            min="0.1"
-            max="10"
-            value={customWidth}
-            onChange={(e) => setCustomWidth(e.target.value)}
-            placeholder="Ej: 1.5"
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="height">Alto (m)</Label>
-          <Input
-            id="height"
-            type="number"
-            step="0.1"
-            min="0.1"
-            max="10"
-            value={customHeight}
-            onChange={(e) => setCustomHeight(e.target.value)}
-            placeholder="Ej: 2.0"
-          />
-        </div>
-
-        <div>
           <Label htmlFor="quantity">Cantidad</Label>
           <Input
             id="quantity"
@@ -211,6 +175,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
             max="100"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
+            className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
           />
         </div>
 
@@ -224,28 +189,32 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="Ej: 45.50"
+            className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
           />
         </div>
       </div>
 
       <div className="flex items-end">
-        <Button onClick={addProduct} className="w-full">
-          <Plus className="h-4 w-4 mr-2" />
+        <Button 
+          onClick={addProduct} 
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+        >
+          <Plus className="h-5 w-5 mr-2" />
           Añadir Producto
         </Button>
       </div>
 
       {products.length > 0 && (
         <div className="space-y-3">
-          <h3 className="font-semibold">Productos Añadidos:</h3>
+          <h3 className="font-semibold text-gray-800">Productos Añadidos:</h3>
           {products.map(product => (
-            <Card key={product.id}>
+            <Card key={product.id} className="shadow-sm hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-4">
                 <div className="flex justify-between items-center">
                   <div className="flex-1">
-                    <h4 className="font-medium">{product.name}</h4>
+                    <h4 className="font-medium text-gray-800">{product.name}</h4>
                     <p className="text-sm text-gray-600">
-                      {product.width}m x {product.height}m | Cantidad: {product.quantity} | {product.unitOfMeasure}
+                      Cantidad: {product.quantity} | {UNIT_OF_MEASURE.find(u => u.id === product.unitOfMeasure)?.name}
                     </p>
                     <p className="text-sm font-medium text-blue-600">
                       S/. {calculateProductPrice(product).toFixed(2)}
@@ -255,6 +224,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
                     variant="outline"
                     size="sm"
                     onClick={() => removeProduct(product.id)}
+                    className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400 transition-all duration-200"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
