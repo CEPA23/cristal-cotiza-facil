@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -103,11 +104,14 @@ const Index = () => {
         title: "Cotización generada",
         description: `Cotización ${quote.id} creada exitosamente.`,
         action: (
-          <Link to="/quotes">
-            <Button variant="outline" size="sm" className="text-blue-600 border-blue-300 hover:bg-blue-50">
-              Ver Cotizaciones
-            </Button>
-          </Link>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="text-blue-600 border-blue-300 hover:bg-blue-50"
+            onClick={() => window.location.href = '/quotes'}
+          >
+            Ver Cotizaciones
+          </Button>
         ),
       });
 
