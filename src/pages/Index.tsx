@@ -150,10 +150,10 @@ const Index = () => {
             <Building2 className="h-12 w-12 text-blue-600 mr-3" />
             <h1 className="text-4xl font-bold text-gray-800">Sistema de Cotización</h1>
           </div>
-          <p className="text-xl text-gray-600">Vidriería Profesional</p>
+          <p className="text-xl text-gray-600">Vidriería</p>
           <div className="mt-4">
             <Link to="/quotes">
-              <Button variant="outline" className="mr-4 bg-white hover:bg-gray-50 border-gray-300 text-gray-700 font-medium px-6 py-2 rounded-lg shadow-sm hover:shadow-md transition-all duration-200">
+              <Button variant="outline" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
                 Ver Cotizaciones
               </Button>
             </Link>
