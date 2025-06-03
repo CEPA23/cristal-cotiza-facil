@@ -11,12 +11,12 @@ import { cn } from '@/lib/utils';
 import { Product } from '@/pages/Index';
 
 const PRODUCT_TYPES = [
-  { id: 'templado', name: 'Vidrio Templado' },
-  { id: 'laminado', name: 'Vidrio Laminado' },
-  { id: 'espejo', name: 'Espejo' },
-  { id: 'flotado', name: 'Vidrio Flotado' },
-  { id: 'doble', name: 'Doble Vidrio Hermético' },
-  { id: 'acustico', name: 'Vidrio Acústico' },
+  { id: 'templado', name: 'Vidrio Templado', basePrice: 120, unitOfMeasure: 'm2' },
+  { id: 'laminado', name: 'Vidrio Laminado', basePrice: 150, unitOfMeasure: 'm2' },
+  { id: 'espejo', name: 'Espejo', basePrice: 80, unitOfMeasure: 'm2' },
+  { id: 'flotado', name: 'Vidrio Flotado', basePrice: 60, unitOfMeasure: 'm2' },
+  { id: 'doble', name: 'Doble Vidrio Hermético', basePrice: 200, unitOfMeasure: 'm2' },
+  { id: 'acustico', name: 'Vidrio Acústico', basePrice: 250, unitOfMeasure: 'm2' },
 ];
 
 const UNIT_OF_MEASURE = [
@@ -38,16 +38,42 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
   const [unitOpen, setUnitOpen] = useState(false);
   const [selectedType, setSelectedType] = useState('');
   const [selectedTypeName, setSelectedTypeName] = useState('');
+  const [customProductName, setCustomProductName] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [unitOfMeasure, setUnitOfMeasure] = useState('');
   const [price, setPrice] = useState('');
 
+  const handleProductSelect = (productType: typeof PRODUCT_TYPES[0]) => {
+    setSelectedType(productType.id);
+    setSelectedTypeName(productType.name);
+    setCustomProductName(productType.name);
+    setPrice(productType.basePrice.toString());
+    setUnitOfMeasure(productType.unitOfMeasure);
+    setOpen(false);
+  };
+
+  const handleCustomProductNameChange = (value: string) => {
+    setCustomProductName(value);
+    setSelectedTypeName(value);
+    
+    // Si coincide con un producto predefinido, cargar sus datos
+    const matchedProduct = PRODUCT_TYPES.find(p => 
+      p.name.toLowerCase().includes(value.toLowerCase()) || 
+      value.toLowerCase().includes(p.name.toLowerCase())
+    );
+    
+    if (matchedProduct && value.length > 3) {
+      setPrice(matchedProduct.basePrice.toString());
+      setUnitOfMeasure(matchedProduct.unitOfMeasure);
+    }
+  };
+
   const addProduct = () => {
-    if (!selectedType || !unitOfMeasure || !price) return;
+    if (!customProductName.trim() || !unitOfMeasure || !price) return;
 
     const newProduct: Product = {
       id: `${Date.now()}-${Math.random()}`,
-      name: selectedTypeName,
+      name: customProductName.trim(),
       basePrice: parseFloat(price),
       width: 1,
       height: 1,
@@ -61,6 +87,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
     // Reset form
     setSelectedType('');
     setSelectedTypeName('');
+    setCustomProductName('');
     setQuantity('1');
     setUnitOfMeasure('');
     setPrice('');
@@ -87,25 +114,41 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
                 aria-expanded={open}
                 className="w-full justify-between bg-white hover:bg-gray-50 border-gray-300 transition-all duration-200"
               >
-                {selectedTypeName || "Seleccionar producto..."}
+                {customProductName || "Seleccionar o escribir producto..."}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0 bg-white shadow-lg border border-gray-200">
               <Command>
-                <CommandInput placeholder="Buscar producto..." />
+                <CommandInput 
+                  placeholder="Buscar o escribir producto..." 
+                  value={customProductName}
+                  onValueChange={handleCustomProductNameChange}
+                />
                 <CommandList>
-                  <CommandEmpty>No se encontró el producto.</CommandEmpty>
+                  <CommandEmpty>
+                    {customProductName && (
+                      <div className="p-2">
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start"
+                          onClick={() => {
+                            setSelectedTypeName(customProductName);
+                            setOpen(false);
+                          }}
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Crear "{customProductName}"
+                        </Button>
+                      </div>
+                    )}
+                  </CommandEmpty>
                   <CommandGroup>
                     {PRODUCT_TYPES.map((type) => (
                       <CommandItem
                         key={type.id}
                         value={type.name}
-                        onSelect={() => {
-                          setSelectedType(type.id);
-                          setSelectedTypeName(type.name);
-                          setOpen(false);
-                        }}
+                        onSelect={() => handleProductSelect(type)}
                       >
                         <Check
                           className={cn(
@@ -113,7 +156,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
                             selectedType === type.id ? "opacity-100" : "opacity-0"
                           )}
                         />
-                        {type.name}
+                        <div className="flex-1">
+                          <div className="font-medium">{type.name}</div>
+                          <div className="text-xs text-gray-500">
+                            S/. {type.basePrice} por {UNIT_OF_MEASURE.find(u => u.id === type.unitOfMeasure)?.name}
+                          </div>
+                        </div>
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -197,7 +245,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
       <div className="flex items-end">
         <Button 
           onClick={addProduct} 
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
         >
           <Plus className="h-5 w-5 mr-2" />
           Añadir Producto

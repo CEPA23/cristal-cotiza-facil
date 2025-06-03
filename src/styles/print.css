@@ -1,0 +1,120 @@
+
+/* Estilos específicos para impresión */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+
+  .print\:break-inside-avoid {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print\:break-before {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  .print\:text-black {
+    color: black !important;
+  }
+
+  .print\:bg-white {
+    background-color: white !important;
+  }
+
+  .print\:border-black {
+    border-color: black !important;
+  }
+
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+
+  .print\:text-xs {
+    font-size: 10pt !important;
+  }
+
+  .print\:text-sm {
+    font-size: 11pt !important;
+  }
+
+  .print\:text-lg {
+    font-size: 14pt !important;
+  }
+
+  .print\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .print\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .print\:gap-2 {
+    gap: 0.5rem !important;
+  }
+
+  .print\:border {
+    border-width: 1px !important;
+  }
+
+  .print\:rounded-none {
+    border-radius: 0 !important;
+  }
+
+  .print\:pb-4 {
+    padding-bottom: 1rem !important;
+  }
+
+  .print\:mb-2 {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .print\:h-3 {
+    height: 0.75rem !important;
+  }
+
+  .print\:w-3 {
+    width: 0.75rem !important;
+  }
+
+  .print\:justify-start {
+    justify-content: flex-start !important;
+  }
+
+  /* Ocultar elementos no necesarios en la impresión */
+  button,
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Asegurar que el contenido se vea bien en papel */
+  .container {
+    max-width: none !important;
+    padding: 0 !important;
+  }
+
+  /* Mejorar el espaciado para impresión */
+  .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 1rem !important;
+  }
+
+  .space-y-2 > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.5rem !important;
+  }
+}

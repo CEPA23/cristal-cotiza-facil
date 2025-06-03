@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import { CustomerForm } from '@/components/CustomerForm';
 import { QuotePreview } from '@/components/QuotePreview';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, Download, Printer, MessageSquare } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 export interface Product {
   id: string;
@@ -39,6 +37,7 @@ export interface Quote {
   total: number;
   status: 'En espera' | 'Aprobado' | 'Rechazado';
   rejectionReason?: string;
+  seller?: string;
 }
 
 const Index = () => {
@@ -47,6 +46,7 @@ const Index = () => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [shippingService, setShippingService] = useState('');
   const [shippingCost, setShippingCost] = useState('0');
+  const [seller, setSeller] = useState('Carlos Porras');
   const { toast } = useToast();
 
   const calculateTotal = () => {
@@ -73,6 +73,15 @@ const Index = () => {
 
   const summary = getQuotesSummary();
 
+  const generatePDFContent = () => {
+    // Crear un elemento temporal para capturar el contenido de la cotización
+    const printContent = document.querySelector('.quote-preview-content');
+    if (!printContent) return null;
+
+    const blob = new Blob([printContent.innerHTML], { type: 'text/html' });
+    return blob;
+  };
+
   const handleGenerateQuote = async () => {
     if (!customer || products.length === 0) {
       toast({
@@ -93,7 +102,8 @@ const Index = () => {
         products,
         date: new Date().toLocaleDateString('es-PE'),
         total: calculateTotal() + parseFloat(shippingCost || '0'),
-        status: 'En espera'
+        status: 'En espera',
+        seller
       };
 
       // Guardar en localStorage - newest first
@@ -129,17 +139,53 @@ const Index = () => {
       title: "Descargando PDF",
       description: "La cotización se está descargando...",
     });
+    // Aquí se implementaría la generación real del PDF
   };
 
   const handlePrintPDF = () => {
-    window.print();
+    // Importar estilos de impresión
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/src/styles/print.css';
+    document.head.appendChild(link);
+    
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   const handleSendWhatsApp = () => {
-    const message = `Hola! Te envío la cotización de vidriería. Total: S/. ${calculateTotal().toFixed(2)}`;
-    const phoneNumber = customer?.phone.replace(/\D/g, '');
+    if (!customer) return;
+
+    const quoteId = `COT-${Date.now()}`;
+    const message = `¡Hola ${customer.name}! 👋
+
+Te envío la cotización de vidriería que solicitaste:
+
+📄 *Cotización:* ${quoteId}
+📅 *Fecha:* ${new Date().toLocaleDateString('es-PE')}
+👤 *Vendedor:* ${seller}
+💰 *Total:* S/. ${(calculateTotal() + parseFloat(shippingCost || '0')).toFixed(2)}
+
+📋 *Productos cotizados:*
+${products.map(p => `• ${p.name} - Cantidad: ${p.quantity}`).join('\n')}
+
+${shippingService ? `🚚 *Envío:* ${shippingService} - S/. ${shippingCost}` : ''}
+
+📞 Para cualquier consulta, no dudes en contactarme.
+
+¡Gracias por confiar en nosotros! 😊
+
+_El PDF detallado de la cotización te llegará por separado._`;
+
+    const phoneNumber = customer.phone.replace(/\D/g, '');
     const url = `https://wa.me/51${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
+
+    toast({
+      title: "WhatsApp enviado",
+      description: "Se ha enviado el mensaje con la cotización detallada.",
+    });
   };
 
   return (
@@ -152,11 +198,13 @@ const Index = () => {
           </div>
           <p className="text-xl text-gray-600">Vidriería</p>
           <div className="mt-4">
-            <Link to="/quotes">
-              <Button variant="outline" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
-                Ver Cotizaciones
-              </Button>
-            </Link>
+            <Button 
+              onClick={() => window.location.href = '/quotes'}
+              variant="outline" 
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              Ver Cotizaciones
+            </Button>
           </div>
         </header>
 
@@ -213,6 +261,24 @@ const Index = () => {
 
             <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
               <CardHeader>
+                <CardTitle>Información del Vendedor</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <Label htmlFor="seller">Nombre del Vendedor</Label>
+                  <Input
+                    id="seller"
+                    value={seller}
+                    onChange={(e) => setSeller(e.target.value)}
+                    placeholder="Nombre del vendedor"
+                    className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader>
                 <CardTitle>Servicios de Envío</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -249,13 +315,16 @@ const Index = () => {
                 <CardTitle>Vista Previa de Cotización</CardTitle>
               </CardHeader>
               <CardContent>
-                <QuotePreview 
-                  customer={customer}
-                  products={products}
-                  total={calculateTotal() + parseFloat(shippingCost || '0')}
-                  shippingService={shippingService}
-                  shippingCost={parseFloat(shippingCost || '0')}
-                />
+                <div className="quote-preview-content">
+                  <QuotePreview 
+                    customer={customer}
+                    products={products}
+                    total={calculateTotal() + parseFloat(shippingCost || '0')}
+                    shippingService={shippingService}
+                    shippingCost={parseFloat(shippingCost || '0')}
+                    seller={seller}
+                  />
+                </div>
               </CardContent>
             </Card>
 
@@ -266,7 +335,7 @@ const Index = () => {
               <CardContent className="space-y-4">
                 <Button 
                   onClick={handleGenerateQuote}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                   disabled={isGeneratingPDF}
                 >
                   {isGeneratingPDF ? 'Generando...' : 'Generar Cotización'}
@@ -298,7 +367,7 @@ const Index = () => {
                     size="sm"
                     onClick={handleSendWhatsApp}
                     disabled={!customer || products.length === 0}
-                    className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700 transition-all duration-200 hover:shadow-md"
+                    className="bg-green-50 hover:bg-green-100 border-green-300 text-green-700 transition-all duration-200 hover:shadow-md"
                   >
                     <MessageSquare className="h-4 w-4 mr-1" />
                     WhatsApp
