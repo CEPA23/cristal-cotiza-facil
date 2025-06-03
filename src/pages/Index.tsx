@@ -8,6 +8,7 @@ import { CustomerForm } from '@/components/CustomerForm';
 import { QuotePreview } from '@/components/QuotePreview';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, Download, Printer, MessageSquare } from 'lucide-react';
+import { downloadQuotePDF, generateQuotePDF } from '@/services/pdfGenerator';
 
 export interface Product {
   id: string;
@@ -134,31 +135,104 @@ const Index = () => {
     }, 2000);
   };
 
-  const handleDownloadPDF = () => {
-    toast({
-      title: "Descargando PDF",
-      description: "La cotización se está descargando...",
-    });
-    // Aquí se implementaría la generación real del PDF
+  const handleDownloadPDF = async () => {
+    if (!customer || products.length === 0) {
+      toast({
+        title: "Datos incompletos",
+        description: "Complete los datos del cliente y añada productos para descargar el PDF.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsGeneratingPDF(true);
+      await downloadQuotePDF({
+        customer,
+        products,
+        total: calculateTotal() + parseFloat(shippingCost || '0'),
+        shippingService,
+        shippingCost: parseFloat(shippingCost || '0'),
+        seller,
+        quoteId: `COT-${Date.now().toString().slice(-6)}`
+      });
+
+      toast({
+        title: "PDF descargado",
+        description: "La cotización se ha descargado exitosamente.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Hubo un problema al generar el PDF.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeneratingPDF(false);
+    }
   };
 
-  const handlePrintPDF = () => {
-    // Importar estilos de impresión
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = '/src/styles/print.css';
-    document.head.appendChild(link);
-    
-    setTimeout(() => {
-      window.print();
-    }, 100);
+  const handlePrintPDF = async () => {
+    if (!customer || products.length === 0) {
+      toast({
+        title: "Datos incompletos",
+        description: "Complete los datos del cliente y añada productos para imprimir.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Generar el PDF y abrirlo en una nueva ventana para imprimir
+      const pdfBlob = await generateQuotePDF({
+        customer,
+        products,
+        total: calculateTotal() + parseFloat(shippingCost || '0'),
+        shippingService,
+        shippingCost: parseFloat(shippingCost || '0'),
+        seller,
+        quoteId: `COT-${Date.now().toString().slice(-6)}`
+      });
+
+      const url = URL.createObjectURL(pdfBlob);
+      const printWindow = window.open(url, '_blank');
+      
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Hubo un problema al preparar la impresión.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleSendWhatsApp = () => {
+  const handleSendWhatsApp = async () => {
     if (!customer) return;
 
-    const quoteId = `COT-${Date.now()}`;
-    const message = `¡Hola ${customer.name}! 👋
+    const quoteId = `COT-${Date.now().toString().slice(-6)}`;
+    
+    try {
+      // Generar el PDF
+      const pdfBlob = await generateQuotePDF({
+        customer,
+        products,
+        total: calculateTotal() + parseFloat(shippingCost || '0'),
+        shippingService,
+        shippingCost: parseFloat(shippingCost || '0'),
+        seller,
+        quoteId
+      });
+
+      // Crear un archivo temporal para el PDF
+      const file = new File([pdfBlob], `cotizacion-${quoteId}.pdf`, { type: 'application/pdf' });
+      
+      // Mensaje para WhatsApp
+      const message = `¡Hola ${customer.name}! 👋
 
 Te envío la cotización de vidriería que solicitaste:
 
@@ -176,16 +250,68 @@ ${shippingService ? `🚚 *Envío:* ${shippingService} - S/. ${shippingCost}` : 
 
 ¡Gracias por confiar en nosotros! 😊
 
-_El PDF detallado de la cotización te llegará por separado._`;
+📎 *Adjunto encontrarás el PDF detallado de la cotización.*`;
 
-    const phoneNumber = customer.phone.replace(/\D/g, '');
-    const url = `https://wa.me/51${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+      const phoneNumber = customer.phone.replace(/\D/g, '');
+      
+      // Verificar si el dispositivo soporta la API de compartir archivos
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        // Usar la API nativa de compartir
+        await navigator.share({
+          title: `Cotización ${quoteId}`,
+          text: message,
+          files: [file]
+        });
+      } else {
+        // Fallback: abrir WhatsApp Web con el mensaje (sin archivo)
+        const url = `https://wa.me/51${phoneNumber}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+        
+        // Descargar el PDF por separado
+        const downloadUrl = URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = `cotizacion-${quoteId}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(downloadUrl);
+        
+        toast({
+          title: "WhatsApp abierto",
+          description: "Se ha abierto WhatsApp con el mensaje. El PDF se descargó para que puedas enviarlo manualmente.",
+        });
+        return;
+      }
 
-    toast({
-      title: "WhatsApp enviado",
-      description: "Se ha enviado el mensaje con la cotización detallada.",
-    });
+      toast({
+        title: "Cotización compartida",
+        description: "Se ha enviado la cotización con el PDF por WhatsApp.",
+      });
+    } catch (error) {
+      console.error('Error al enviar por WhatsApp:', error);
+      
+      // Fallback: solo enviar el mensaje de texto
+      const simpleMessage = `¡Hola ${customer.name}! 👋
+
+Te envío la cotización de vidriería:
+
+📄 *Cotización:* ${quoteId}
+💰 *Total:* S/. ${(calculateTotal() + parseFloat(shippingCost || '0')).toFixed(2)}
+
+📞 Para más detalles, contáctame.
+
+¡Gracias por confiar en nosotros! 😊`;
+
+      const phoneNumber = customer.phone.replace(/\D/g, '');
+      const url = `https://wa.me/51${phoneNumber}?text=${encodeURIComponent(simpleMessage)}`;
+      window.open(url, '_blank');
+
+      toast({
+        title: "WhatsApp abierto",
+        description: "Se ha enviado el mensaje básico. Descarga el PDF por separado desde el botón Descargar.",
+      });
+    }
   };
 
   return (
@@ -346,11 +472,11 @@ _El PDF detallado de la cotización te llegará por separado._`;
                     variant="outline" 
                     size="sm"
                     onClick={handleDownloadPDF}
-                    disabled={!customer || products.length === 0}
+                    disabled={!customer || products.length === 0 || isGeneratingPDF}
                     className="bg-white hover:bg-gray-50 border-gray-300 text-gray-700 transition-all duration-200 hover:shadow-md"
                   >
                     <Download className="h-4 w-4 mr-1" />
-                    Descargar
+                    {isGeneratingPDF ? 'Generando...' : 'Descargar'}
                   </Button>
                   <Button 
                     variant="outline" 
