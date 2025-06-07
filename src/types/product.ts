@@ -13,6 +13,7 @@ export interface NonTransformableProduct extends BaseProduct {
   height: number;
   glassType: string;
   thickness: number; // in mm
+  glassTypeMultiplier?: number;
 }
 
 export interface TransformableProduct extends BaseProduct {
