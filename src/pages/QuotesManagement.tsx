@@ -102,6 +102,18 @@ const QuotesManagement = () => {
 
   const summary = getQuotesSummary();
 
+  const getProductDisplayText = (product: any) => {
+    if (product.type === 'transformable' && product.configuration) {
+      return `${product.name} (${product.configuration.width}m × ${product.configuration.height}m)`;
+    } else if (product.width && product.height) {
+      // Legacy product format
+      return `${product.name} (${product.width}m × ${product.height}m)`;
+    } else {
+      // Non-transformable product
+      return `${product.name}`;
+    }
+  };
+
   const handleViewQuote = (quote: Quote) => {
     setSelectedQuote(quote);
     setIsDetailOpen(true);
@@ -285,7 +297,7 @@ const QuotesManagement = () => {
                     <div className="space-y-1">
                       {quote.products.map((product, index) => (
                         <div key={index} className="text-sm text-gray-600 flex justify-between">
-                          <span>{product.name} ({product.width}m × {product.height}m)</span>
+                          <span>{getProductDisplayText(product)}</span>
                           <span>Cant: {product.quantity}</span>
                         </div>
                       ))}
