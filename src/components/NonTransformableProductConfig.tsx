@@ -24,6 +24,8 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [unitOfMeasure, setUnitOfMeasure] = useState('');
+  const [width, setWidth] = useState(1);
+  const [height, setHeight] = useState(1);
 
   const handleProductSelect = (productName: string) => {
     const product = NON_TRANSFORMABLE_PRODUCTS.find(p => p.name === productName);
@@ -43,7 +45,9 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
       basePrice: price,
       quantity,
       unitOfMeasure,
-      type: 'no-transformable'
+      type: 'no-transformable',
+      width,
+      height
     };
 
     onSave(product);
@@ -54,9 +58,12 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
     setPrice(0);
     setQuantity(1);
     setUnitOfMeasure('');
+    setWidth(1);
+    setHeight(1);
   };
 
-  const total = price * quantity;
+  const area = width * height;
+  const total = price * area * quantity;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -90,6 +97,33 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
             </Select>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="width">Ancho (m)</Label>
+              <Input
+                id="width"
+                type="number"
+                step="0.01"
+                min="0.1"
+                value={width}
+                onChange={(e) => setWidth(parseFloat(e.target.value) || 1)}
+                disabled={!selectedProduct}
+              />
+            </div>
+            <div>
+              <Label htmlFor="height">Alto (m)</Label>
+              <Input
+                id="height"
+                type="number"
+                step="0.01"
+                min="0.1"
+                value={height}
+                onChange={(e) => setHeight(parseFloat(e.target.value) || 1)}
+                disabled={!selectedProduct}
+              />
+            </div>
+          </div>
+
           <div>
             <Label htmlFor="price">Precio Unitario (S/.)</Label>
             <Input
@@ -118,14 +152,25 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
           {selectedProduct && (
             <Card>
               <CardContent className="pt-6">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Total:</span>
-                  <span className="text-lg font-bold text-blue-600">
-                    S/. {total.toFixed(2)}
-                  </span>
-                </div>
-                <div className="text-sm text-gray-500 mt-1">
-                  {quantity} {unitOfMeasure} × S/. {price.toFixed(2)}
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Área:</span>
+                    <span>{area.toFixed(2)} m²</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Precio por m²:</span>
+                    <span>S/. {price.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Cantidad:</span>
+                    <span>{quantity} unidad{quantity > 1 ? 'es' : ''}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-t pt-2">
+                    <span className="font-medium">Total:</span>
+                    <span className="text-lg font-bold text-blue-600">
+                      S/. {total.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
