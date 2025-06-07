@@ -9,6 +9,7 @@ import { QuotePreview } from '@/components/QuotePreview';
 import { useToast } from '@/hooks/use-toast';
 import { Building2, Download, Printer, MessageSquare } from 'lucide-react';
 import { downloadQuotePDF, generateQuotePDF } from '@/services/pdfGenerator';
+import { Product } from '@/types/product';
 
 export interface Product {
   id: string;
@@ -19,6 +20,7 @@ export interface Product {
   quantity: number;
   customSize?: boolean;
   unitOfMeasure?: string;
+  type?: string; // Add type property
 }
 
 export interface Customer {
@@ -52,6 +54,9 @@ const Index = () => {
 
   const calculateTotal = () => {
     return products.reduce((total, product) => {
+      if (product.type === 'transformable') {
+        return total + product.basePrice;
+      }
       return total + (product.basePrice * product.quantity);
     }, 0);
   };
