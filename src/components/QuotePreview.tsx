@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Building2, Calendar, User, Phone, Mail, MapPin, Truck, UserCheck } from 'lucide-react';
+import { Building2, Calendar, User, Phone, Mail, MapPin, Truck, UserCheck, Car } from 'lucide-react';
 import { Customer } from '@/pages/Index';
 import { Product } from '@/types/product';
 
@@ -12,6 +12,7 @@ interface QuotePreviewProps {
   total: number;
   shippingService?: string;
   shippingCost?: number;
+  travelExpenses?: number;
   seller?: string;
 }
 
@@ -21,6 +22,7 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
   total, 
   shippingService, 
   shippingCost = 0,
+  travelExpenses = 0,
   seller = "Carlos Porras"
 }) => {
   const currentDate = new Date().toLocaleDateString('es-PE', {
@@ -34,9 +36,10 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
     if (product.type === 'transformable') {
       return product.basePrice;
     }
-    // For non-transformable products, calculate based on area
+    // For non-transformable products, calculate based on area and glass type multiplier
     const area = product.width * product.height;
-    return product.basePrice * area * product.quantity;
+    const glassMultiplier = product.glassTypeMultiplier || 1;
+    return product.basePrice * area * product.quantity * glassMultiplier;
   };
 
   if (!customer && products.length === 0) {
@@ -163,7 +166,9 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
                           <>
                             <p>Dimensiones: {product.width}m × {product.height}m = {(product.width * product.height).toFixed(2)}m²</p>
                             <p>Cantidad: {product.quantity} unidad{product.quantity > 1 ? 'es' : ''}</p>
-                            <p>Precio unitario: S/. {product.basePrice}/m²</p>
+                            <p>Tipo de vidrio: {product.glassType}</p>
+                            <p>Grosor: {product.thickness}mm</p>
+                            <p>Precio base: S/. {product.basePrice}/m²</p>
                             <p className="font-semibold text-blue-600 print:text-black">
                               Total: S/. {productTotal.toFixed(2)}
                             </p>
@@ -195,6 +200,22 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
         </div>
       )}
 
+      {/* Travel Expenses */}
+      {travelExpenses > 0 && (
+        <div className="print:break-inside-avoid">
+          <h3 className="font-semibold mb-3 flex items-center text-blue-600 print:text-black">
+            <Car className="h-4 w-4 mr-2" />
+            VIÁTICOS
+          </h3>
+          <div className="bg-gray-50 p-3 rounded border print:bg-white print:border print:border-black">
+            <div className="flex justify-between items-center">
+              <span className="print:text-sm">Gastos de viaje</span>
+              <span className="font-semibold print:text-sm">S/. {travelExpenses.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Total - Mejorado para impresión */}
       {products.length > 0 && (
         <div className="print:break-inside-avoid">
@@ -208,6 +229,12 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
               <div className="flex justify-between items-center print:text-sm">
                 <span>Envío:</span>
                 <span>S/. {shippingCost.toFixed(2)}</span>
+              </div>
+            )}
+            {travelExpenses > 0 && (
+              <div className="flex justify-between items-center print:text-sm">
+                <span>Viáticos:</span>
+                <span>S/. {travelExpenses.toFixed(2)}</span>
               </div>
             )}
             <Separator className="print:border-black" />
