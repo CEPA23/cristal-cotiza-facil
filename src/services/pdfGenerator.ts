@@ -1,3 +1,4 @@
+
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Customer } from '@/pages/Index';
@@ -27,6 +28,7 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
     if (product.type === 'transformable') {
       return product.basePrice;
     }
+    // For non-transformable products, calculate based on area
     const area = product.width * product.height;
     return product.basePrice * area * product.quantity;
   };

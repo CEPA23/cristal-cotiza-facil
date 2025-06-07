@@ -10,6 +10,8 @@ export interface BaseProduct {
 
 export interface NonTransformableProduct extends BaseProduct {
   type: 'no-transformable';
+  width: number;
+  height: number;
 }
 
 export interface TransformableProduct extends BaseProduct {

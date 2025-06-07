@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -33,6 +34,7 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
     if (product.type === 'transformable') {
       return product.basePrice;
     }
+    // For non-transformable products, calculate based on area
     const area = product.width * product.height;
     return product.basePrice * area * product.quantity;
   };
