@@ -8,20 +8,24 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Calculator, Save } from 'lucide-react';
-import { TransformableProduct, SERIE_62_COMPONENTS } from '@/types/product';
+import { TransformableProduct, SERIE_62_COMPONENTS, GLASS_TYPES } from '@/types/product';
 
 interface TransformableProductConfigProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (product: TransformableProduct) => void;
   productName: string;
+  glassType: string;
+  thickness: number;
 }
 
 export const TransformableProductConfig: React.FC<TransformableProductConfigProps> = ({
   isOpen,
   onClose,
   onSave,
-  productName
+  productName,
+  glassType,
+  thickness
 }) => {
   const [divisions, setDivisions] = useState(2);
   const [width, setWidth] = useState(0);
@@ -38,6 +42,7 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   );
 
   const area = width * height;
+  const glassTypeMultiplier = GLASS_TYPES.find(gt => gt.name === glassType)?.multiplier || 1;
   const componentsSubtotal = components
     .filter(comp => comp.isSelected)
     .reduce((sum, comp) => sum + (comp.price * comp.quantity), 0);
@@ -57,6 +62,9 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
       quantity: 1,
       unitOfMeasure: 'unidad',
       type: 'transformable',
+      glassType,
+      thickness,
+      glassTypeMultiplier,
       configuration: {
         series: 'serie-62',
         divisions,
@@ -85,6 +93,27 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Información del vidrio */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Información del Vidrio</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Tipo de Vidrio</Label>
+                <div className="p-2 bg-gray-50 rounded border">
+                  {glassType} (x{glassTypeMultiplier})
+                </div>
+              </div>
+              <div>
+                <Label>Espesor</Label>
+                <div className="p-2 bg-gray-50 rounded border">
+                  {thickness}mm
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Configuración básica */}
           <Card>
             <CardHeader>
@@ -256,10 +285,14 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                 <span>Ganancia:</span>
                 <span>S/. {profitMargin.toFixed(2)}</span>
               </div>
+              <div className="flex justify-between">
+                <span>Multiplicador Vidrio:</span>
+                <span>x{glassTypeMultiplier}</span>
+              </div>
               <Separator />
               <div className="flex justify-between text-lg font-bold text-blue-600">
                 <span>Total:</span>
-                <span>S/. {total.toFixed(2)}</span>
+                <span>S/. {(total * glassTypeMultiplier).toFixed(2)}</span>
               </div>
             </CardContent>
           </Card>
