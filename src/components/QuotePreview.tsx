@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Building2, Calendar, User, Phone, Mail, MapPin, Truck, UserCheck } from 'lucide-react';
-import { Customer, Product } from '@/pages/Index';
+import { Customer } from '@/pages/Index';
+import { Product } from '@/types/product';
 
 interface QuotePreviewProps {
   customer: Customer | null;
@@ -30,6 +30,9 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
   });
 
   const calculateProductPrice = (product: Product) => {
+    if (product.type === 'transformable') {
+      return product.basePrice;
+    }
     const area = product.width * product.height;
     return product.basePrice * area * product.quantity;
   };
@@ -137,7 +140,6 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
           <h3 className="font-semibold mb-3 text-blue-600 print:text-black">DETALLE DE PRODUCTOS</h3>
           <div className="space-y-2">
             {products.map((product, index) => {
-              const area = product.width * product.height;
               const productTotal = calculateProductPrice(product);
               
               return (
@@ -146,12 +148,25 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
                     <div className="flex-1">
                       <p className="font-medium print:text-sm">{product.name}</p>
                       <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 print:text-black mt-1">
-                        <p>Dimensiones: {product.width}m × {product.height}m = {area.toFixed(2)}m²</p>
-                        <p>Cantidad: {product.quantity} unidad{product.quantity > 1 ? 'es' : ''}</p>
-                        <p>Precio unitario: S/. {product.basePrice}/m²</p>
-                        <p className="font-semibold text-blue-600 print:text-black">
-                          Total: S/. {productTotal.toFixed(2)}
-                        </p>
+                        {product.type === 'transformable' ? (
+                          <>
+                            <p>Tipo: Transformable</p>
+                            <p>Cantidad: {product.quantity} unidad{product.quantity > 1 ? 'es' : ''}</p>
+                            <p>Configuración personalizada</p>
+                            <p className="font-semibold text-blue-600 print:text-black">
+                              Total: S/. {productTotal.toFixed(2)}
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p>Dimensiones: {product.width}m × {product.height}m = {(product.width * product.height).toFixed(2)}m²</p>
+                            <p>Cantidad: {product.quantity} unidad{product.quantity > 1 ? 'es' : ''}</p>
+                            <p>Precio unitario: S/. {product.basePrice}/m²</p>
+                            <p className="font-semibold text-blue-600 print:text-black">
+                              Total: S/. {productTotal.toFixed(2)}
+                            </p>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>

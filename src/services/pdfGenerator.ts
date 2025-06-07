@@ -1,7 +1,7 @@
-
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { Customer, Product } from '@/pages/Index';
+import { Customer } from '@/pages/Index';
+import { Product } from '@/types/product';
 
 export interface QuoteData {
   customer: Customer;
@@ -24,6 +24,9 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
   });
 
   const calculateProductPrice = (product: Product) => {
+    if (product.type === 'transformable') {
+      return product.basePrice;
+    }
     const area = product.width * product.height;
     return product.basePrice * area * product.quantity;
   };
@@ -97,22 +100,30 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
             <thead>
               <tr style="background: #f3f4f6;">
                 <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Producto</th>
-                <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Dimensiones</th>
+                <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Especificaciones</th>
                 <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Cantidad</th>
-                <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Precio/m²</th>
+                <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Precio</th>
                 <th style="padding: 12px; text-align: right; font-size: 12px; font-weight: bold; border-bottom: 1px solid #e5e7eb;">Total</th>
               </tr>
             </thead>
             <tbody>
               ${products.map((product, index) => {
-                const area = product.width * product.height;
                 const productTotal = calculateProductPrice(product);
+                const isTransformable = product.type === 'transformable';
+                
                 return `
                   <tr style="${index % 2 === 0 ? 'background: #ffffff;' : 'background: #f9fafb;'}">
                     <td style="padding: 12px; font-size: 11px; border-bottom: 1px solid #f3f4f6;">${product.name}</td>
-                    <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">${product.width}m × ${product.height}m<br><small style="color: #6b7280;">(${area.toFixed(2)}m²)</small></td>
+                    <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">
+                      ${isTransformable ? 
+                        'Configuración personalizada' : 
+                        `${product.width}m × ${product.height}m<br><small style="color: #6b7280;">(${(product.width * product.height).toFixed(2)}m²)</small>`
+                      }
+                    </td>
                     <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">${product.quantity}</td>
-                    <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">S/. ${product.basePrice}</td>
+                    <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">
+                      ${isTransformable ? 'Personalizado' : `S/. ${product.basePrice}`}
+                    </td>
                     <td style="padding: 12px; text-align: right; font-size: 11px; font-weight: bold; color: #2563eb; border-bottom: 1px solid #f3f4f6;">S/. ${productTotal.toFixed(2)}</td>
                   </tr>
                 `;
