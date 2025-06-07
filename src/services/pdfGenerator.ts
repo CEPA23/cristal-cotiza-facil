@@ -1,4 +1,3 @@
-
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { Customer } from '@/pages/Index';
@@ -10,12 +9,13 @@ export interface QuoteData {
   total: number;
   shippingService?: string;
   shippingCost?: number;
+  travelExpenses?: number;
   seller?: string;
   quoteId?: string;
 }
 
 export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
-  const { customer, products, total, shippingService, shippingCost = 0, seller = "Carlos Porras", quoteId } = quoteData;
+  const { customer, products, total, shippingService, shippingCost = 0, travelExpenses = 0, seller = "Carlos Porras", quoteId } = quoteData;
   
   const currentDate = new Date().toLocaleDateString('es-PE', {
     weekday: 'long',
@@ -119,7 +119,7 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
                     <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">
                       ${isTransformable ? 
                         'Configuración personalizada' : 
-                        `${product.width}m × ${product.height}m<br><small style="color: #6b7280;">(${(product.width * product.height).toFixed(2)}m²)</small>`
+                        `${product.width}m × ${product.height}m<br><small style="color: #6b7280;">(${(product.width * product.height).toFixed(2)}m²)</small><br><small style="color: #6b7280;">${product.glassType} - ${product.thickness}mm</small>`
                       }
                     </td>
                     <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">${product.quantity}</td>
@@ -135,15 +135,23 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
         </div>
       </div>
 
-      <!-- Shipping -->
-      ${shippingService ? `
+      <!-- Additional Costs -->
+      ${(shippingService || travelExpenses > 0) ? `
         <div style="margin-bottom: 30px;">
-          <h3 style="color: #2563eb; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">SERVICIO DE ENVÍO</h3>
+          <h3 style="color: #2563eb; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid #e5e7eb; padding-bottom: 5px;">COSTOS ADICIONALES</h3>
           <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
-            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
-              <span>${shippingService}</span>
-              <span style="font-weight: bold;">S/. ${shippingCost.toFixed(2)}</span>
-            </div>
+            ${shippingService ? `
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-bottom: 10px;">
+                <span>🚚 ${shippingService}</span>
+                <span style="font-weight: bold;">S/. ${shippingCost.toFixed(2)}</span>
+              </div>
+            ` : ''}
+            ${travelExpenses > 0 ? `
+              <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+                <span>🚗 Viáticos</span>
+                <span style="font-weight: bold;">S/. ${travelExpenses.toFixed(2)}</span>
+              </div>
+            ` : ''}
           </div>
         </div>
       ` : ''}
@@ -158,6 +166,12 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px;">
             <span>Envío:</span>
             <span>S/. ${shippingCost.toFixed(2)}</span>
+          </div>
+        ` : ''}
+        ${travelExpenses > 0 ? `
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 14px;">
+            <span>Viáticos:</span>
+            <span>S/. ${travelExpenses.toFixed(2)}</span>
           </div>
         ` : ''}
         <hr style="border: none; border-top: 1px solid #2563eb; margin: 15px 0;">

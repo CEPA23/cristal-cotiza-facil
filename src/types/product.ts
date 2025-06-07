@@ -1,4 +1,3 @@
-
 export interface BaseProduct {
   id: string;
   name: string;
@@ -12,6 +11,8 @@ export interface NonTransformableProduct extends BaseProduct {
   type: 'no-transformable';
   width: number;
   height: number;
+  glassType: string;
+  thickness: number; // in mm
 }
 
 export interface TransformableProduct extends BaseProduct {
@@ -54,6 +55,26 @@ export const SERIE_62_COMPONENTS: Omit<Serie62Component, 'id' | 'isSelected'>[] 
   { name: 'Felpa (Flo/Fs)', price: 8.00, quantity: 2 },
   { name: 'Ensamblaje', price: 150.00, quantity: 1 },
   { name: 'Ángulos Martinelli', price: 5.00, quantity: 4, minQuantity: 4, isRequired: true }
+];
+
+export const GLASS_TYPES = [
+  { name: 'Vidrio Crudo', multiplier: 1.0 },
+  { name: 'Vidrio Templado', multiplier: 2.0 },
+  { name: 'Vidrio Laminado', multiplier: 2.5 },
+  { name: 'Espejo', multiplier: 1.3 },
+  { name: 'Vidrio Flotado', multiplier: 1.0 },
+  { name: 'Doble Vidrio Hermético', multiplier: 3.3 },
+  { name: 'Vidrio Acústico', multiplier: 4.2 }
+];
+
+export const GLASS_THICKNESS = [
+  { thickness: 3, name: '3mm' },
+  { thickness: 4, name: '4mm' },
+  { thickness: 5, name: '5mm' },
+  { thickness: 6, name: '6mm' },
+  { thickness: 8, name: '8mm' },
+  { thickness: 10, name: '10mm' },
+  { thickness: 12, name: '12mm' }
 ];
 
 export const NON_TRANSFORMABLE_PRODUCTS = [

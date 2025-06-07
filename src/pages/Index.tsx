@@ -37,6 +37,7 @@ const Index = () => {
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [shippingService, setShippingService] = useState('');
   const [shippingCost, setShippingCost] = useState('0');
+  const [travelExpenses, setTravelExpenses] = useState('0');
   const [seller, setSeller] = useState('Carlos Porras');
   const { toast } = useToast();
 
@@ -95,7 +96,7 @@ const Index = () => {
         customer,
         products,
         date: new Date().toLocaleDateString('es-PE'),
-        total: calculateTotal() + parseFloat(shippingCost || '0'),
+        total: calculateTotal() + parseFloat(shippingCost || '0') + parseFloat(travelExpenses || '0'),
         status: 'En espera',
         seller
       };
@@ -124,6 +125,7 @@ const Index = () => {
       setCustomer(null);
       setShippingService('');
       setShippingCost('0');
+      setTravelExpenses('0');
       setIsGeneratingPDF(false);
     }, 2000);
   };
@@ -143,9 +145,10 @@ const Index = () => {
       await downloadQuotePDF({
         customer,
         products,
-        total: calculateTotal() + parseFloat(shippingCost || '0'),
+        total: calculateTotal() + parseFloat(shippingCost || '0') + parseFloat(travelExpenses || '0'),
         shippingService,
         shippingCost: parseFloat(shippingCost || '0'),
+        travelExpenses: parseFloat(travelExpenses || '0'),
         seller,
         quoteId: `COT-${Date.now().toString().slice(-6)}`
       });
@@ -180,9 +183,10 @@ const Index = () => {
       const pdfBlob = await generateQuotePDF({
         customer,
         products,
-        total: calculateTotal() + parseFloat(shippingCost || '0'),
+        total: calculateTotal() + parseFloat(shippingCost || '0') + parseFloat(travelExpenses || '0'),
         shippingService,
         shippingCost: parseFloat(shippingCost || '0'),
+        travelExpenses: parseFloat(travelExpenses || '0'),
         seller,
         quoteId: `COT-${Date.now().toString().slice(-6)}`
       });
@@ -214,9 +218,10 @@ const Index = () => {
       const pdfBlob = await generateQuotePDF({
         customer,
         products,
-        total: calculateTotal() + parseFloat(shippingCost || '0'),
+        total: calculateTotal() + parseFloat(shippingCost || '0') + parseFloat(travelExpenses || '0'),
         shippingService,
         shippingCost: parseFloat(shippingCost || '0'),
+        travelExpenses: parseFloat(travelExpenses || '0'),
         seller,
         quoteId
       });
@@ -232,12 +237,13 @@ Te envío la cotización de vidriería que solicitaste:
 📄 *Cotización:* ${quoteId}
 📅 *Fecha:* ${new Date().toLocaleDateString('es-PE')}
 👤 *Vendedor:* ${seller}
-💰 *Total:* S/. ${(calculateTotal() + parseFloat(shippingCost || '0')).toFixed(2)}
+💰 *Total:* S/. ${(calculateTotal() + parseFloat(shippingCost || '0') + parseFloat(travelExpenses || '0')).toFixed(2)}
 
 📋 *Productos cotizados:*
 ${products.map(p => `• ${p.name} - Cantidad: ${p.quantity}`).join('\n')}
 
 ${shippingService ? `🚚 *Envío:* ${shippingService} - S/. ${shippingCost}` : ''}
+${parseFloat(travelExpenses || '0') > 0 ? `🚗 *Viáticos:* S/. ${travelExpenses}` : ''}
 
 📞 Para cualquier consulta, no dudes en contactarme.
 
@@ -290,7 +296,7 @@ ${shippingService ? `🚚 *Envío:* ${shippingService} - S/. ${shippingCost}` : 
 Te envío la cotización de vidriería:
 
 📄 *Cotización:* ${quoteId}
-💰 *Total:* S/. ${(calculateTotal() + parseFloat(shippingCost || '0')).toFixed(2)}
+💰 *Total:* S/. ${(calculateTotal() + parseFloat(shippingCost || '0') + parseFloat(travelExpenses || '0')).toFixed(2)}
 
 📞 Para más detalles, contáctame.
 
@@ -398,7 +404,7 @@ Te envío la cotización de vidriería:
 
             <Card className="shadow-sm hover:shadow-md transition-shadow duration-200">
               <CardHeader>
-                <CardTitle>Servicios de Envío</CardTitle>
+                <CardTitle>Costos Adicionales</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -411,18 +417,33 @@ Te envío la cotización de vidriería:
                     className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="shipping-cost">Costo de Envío (S/.)</Label>
-                  <Input
-                    id="shipping-cost"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={shippingCost}
-                    onChange={(e) => setShippingCost(e.target.value)}
-                    placeholder="0.00"
-                    className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="shipping-cost">Costo de Envío (S/.)</Label>
+                    <Input
+                      id="shipping-cost"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={shippingCost}
+                      onChange={(e) => setShippingCost(e.target.value)}
+                      placeholder="0.00"
+                      className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="travel-expenses">Viáticos (S/.)</Label>
+                    <Input
+                      id="travel-expenses"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={travelExpenses}
+                      onChange={(e) => setTravelExpenses(e.target.value)}
+                      placeholder="0.00"
+                      className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -438,9 +459,10 @@ Te envío la cotización de vidriería:
                   <QuotePreview 
                     customer={customer}
                     products={products}
-                    total={calculateTotal() + parseFloat(shippingCost || '0')}
+                    total={calculateTotal() + parseFloat(shippingCost || '0') + parseFloat(travelExpenses || '0')}
                     shippingService={shippingService}
                     shippingCost={parseFloat(shippingCost || '0')}
+                    travelExpenses={parseFloat(travelExpenses || '0')}
                     seller={seller}
                   />
                 </div>
