@@ -1,3 +1,4 @@
+
 export interface BaseProduct {
   id: string;
   name: string;
@@ -18,6 +19,9 @@ export interface NonTransformableProduct extends BaseProduct {
 
 export interface TransformableProduct extends BaseProduct {
   type: 'transformable';
+  glassType: string;
+  thickness: number; // in mm
+  glassTypeMultiplier?: number;
   configuration: {
     series: 'serie-62';
     divisions: number;
@@ -88,5 +92,11 @@ export const NON_TRANSFORMABLE_PRODUCTS = [
 ];
 
 export const TRANSFORMABLE_PRODUCTS = [
-  { name: 'Mampara Serie 62', series: 'serie-62' as const }
+  { name: 'Mampara Serie 62', series: 'serie-62' as const, category: 'Mamparas' }
+];
+
+export const TRANSFORMABLE_CATEGORIES = [
+  'Mamparas',
+  'Puertas',
+  'Ventanas'
 ];

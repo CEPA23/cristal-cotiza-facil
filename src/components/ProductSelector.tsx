@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trash2, Settings, Package } from 'lucide-react';
-import { Product, TRANSFORMABLE_PRODUCTS } from '@/types/product';
+import { Product, GLASS_TYPES } from '@/types/product';
 import { TransformableProductConfig } from './TransformableProductConfig';
 import { NonTransformableProductConfig } from './NonTransformableProductConfig';
+import { TransformableProductSelector } from './TransformableProductSelector';
 
 interface ProductSelectorProps {
   products: Product[];
@@ -13,12 +14,17 @@ interface ProductSelectorProps {
 }
 
 export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onProductsChange }) => {
+  const [showTransformableSelector, setShowTransformableSelector] = useState(false);
   const [showTransformableConfig, setShowTransformableConfig] = useState(false);
   const [showNonTransformableConfig, setShowNonTransformableConfig] = useState(false);
-  const [selectedTransformableProduct, setSelectedTransformableProduct] = useState('');
+  const [selectedTransformableData, setSelectedTransformableData] = useState<{
+    productName: string;
+    glassType: string;
+    thickness: number;
+  } | null>(null);
 
-  const handleTransformableProductSelect = (productName: string) => {
-    setSelectedTransformableProduct(productName);
+  const handleTransformableProductSelect = (productName: string, glassType: string, thickness: number) => {
+    setSelectedTransformableData({ productName, glassType, thickness });
     setShowTransformableConfig(true);
   };
 
@@ -36,9 +42,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
 
   const calculateProductPrice = (product: Product) => {
     if (product.type === 'transformable') {
-      return product.basePrice; // Ya incluye todo el cálculo
+      const glassMultiplier = product.glassTypeMultiplier || 1;
+      return product.basePrice * glassMultiplier;
     }
-    return product.basePrice * product.quantity;
+    const area = product.width * product.height;
+    const glassMultiplier = product.glassTypeMultiplier || 1;
+    return product.basePrice * area * product.quantity * glassMultiplier;
   };
 
   const transformableProducts = products.filter(p => p.type === 'transformable');
@@ -53,19 +62,14 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
             <Settings className="h-8 w-8 mx-auto text-blue-600" />
             <h3 className="font-medium">Productos Transformables</h3>
             <p className="text-xs text-gray-500 mb-3">Mamparas, puertas configurables</p>
-            <div className="space-y-2">
-              {TRANSFORMABLE_PRODUCTS.map((product) => (
-                <Button
-                  key={product.name}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleTransformableProductSelect(product.name)}
-                  className="w-full"
-                >
-                  {product.name}
-                </Button>
-              ))}
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTransformableSelector(true)}
+              className="w-full"
+            >
+              Seleccionar Producto
+            </Button>
           </div>
         </Card>
 
@@ -108,6 +112,8 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
                               <p>Serie: {product.configuration.series}</p>
                               <p>Dimensiones: {product.configuration.width}m × {product.configuration.height}m</p>
                               <p>Área: {product.configuration.area.toFixed(2)}m²</p>
+                              <p>Tipo de vidrio: {product.glassType}</p>
+                              <p>Espesor: {product.thickness}mm</p>
                               <p>Componentes: {product.configuration.components.length}</p>
                               <p>Mano de obra: S/. {product.configuration.laborCost.toFixed(2)}</p>
                               <p>Ganancia: S/. {product.configuration.profitMargin.toFixed(2)}</p>
@@ -148,7 +154,10 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
                         <div className="flex-1">
                           <h4 className="font-medium text-gray-800">{product.name}</h4>
                           <p className="text-sm text-gray-600">
-                            Cantidad: {product.quantity} {product.unitOfMeasure} | Precio: S/. {product.basePrice.toFixed(2)}
+                            Dimensiones: {product.width}m × {product.height}m | Cantidad: {product.quantity} {product.unitOfMeasure}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Tipo de vidrio: {product.glassType} | Espesor: {product.thickness}mm
                           </p>
                           <p className="text-lg font-bold text-green-600 mt-1">
                             S/. {calculateProductPrice(product).toFixed(2)}
@@ -173,12 +182,25 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
       )}
 
       {/* Dialogs */}
-      <TransformableProductConfig
-        isOpen={showTransformableConfig}
-        onClose={() => setShowTransformableConfig(false)}
-        onSave={handleSaveTransformableProduct}
-        productName={selectedTransformableProduct}
+      <TransformableProductSelector
+        isOpen={showTransformableSelector}
+        onClose={() => setShowTransformableSelector(false)}
+        onProductSelect={handleTransformableProductSelect}
       />
+
+      {selectedTransformableData && (
+        <TransformableProductConfig
+          isOpen={showTransformableConfig}
+          onClose={() => {
+            setShowTransformableConfig(false);
+            setSelectedTransformableData(null);
+          }}
+          onSave={handleSaveTransformableProduct}
+          productName={selectedTransformableData.productName}
+          glassType={selectedTransformableData.glassType}
+          thickness={selectedTransformableData.thickness}
+        />
+      )}
 
       <NonTransformableProductConfig
         isOpen={showNonTransformableConfig}

@@ -34,7 +34,8 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
 
   const calculateProductPrice = (product: Product) => {
     if (product.type === 'transformable') {
-      return product.basePrice;
+      const glassMultiplier = product.glassTypeMultiplier || 1;
+      return product.basePrice * glassMultiplier;
     }
     // For non-transformable products, calculate based on area and glass type multiplier
     const area = product.width * product.height;
@@ -157,7 +158,10 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
                           <>
                             <p>Tipo: Transformable</p>
                             <p>Cantidad: {product.quantity} unidad{product.quantity > 1 ? 'es' : ''}</p>
-                            <p>Configuración personalizada</p>
+                            <p>Dimensiones: {product.configuration.width}m × {product.configuration.height}m</p>
+                            <p>Área: {product.configuration.area.toFixed(2)}m²</p>
+                            <p>Tipo de vidrio: {product.glassType}</p>
+                            <p>Espesor: {product.thickness}mm</p>
                             <p className="font-semibold text-blue-600 print:text-black">
                               Total: S/. {productTotal.toFixed(2)}
                             </p>
