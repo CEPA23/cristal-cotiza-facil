@@ -7,6 +7,7 @@ interface CostSummaryCardProps {
   componentsSubtotal: number;
   laborCost: number;
   profitMargin: number;
+  travelExpenses: number;
   glassTypeMultiplier: number;
   total: number;
 }
@@ -15,6 +16,7 @@ export const CostSummaryCard: React.FC<CostSummaryCardProps> = ({
   componentsSubtotal,
   laborCost,
   profitMargin,
+  travelExpenses,
   glassTypeMultiplier,
   total
 }) => {
@@ -35,6 +37,10 @@ export const CostSummaryCard: React.FC<CostSummaryCardProps> = ({
         <div className="flex justify-between">
           <span>Ganancia:</span>
           <span>S/. {profitMargin.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Viáticos:</span>
+          <span>S/. {travelExpenses.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
           <span>Multiplicador Vidrio:</span>

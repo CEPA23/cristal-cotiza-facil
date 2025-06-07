@@ -26,6 +26,7 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   const [slidingPanels, setSlidingPanels] = useState(2);
   const [laborCost, setLaborCost] = useState(200);
   const [profitMargin, setProfitMargin] = useState(300);
+  const [travelExpenses, setTravelExpenses] = useState(0);
   const [components, setComponents] = useState(
     SERIE_62_COMPONENTS.map((comp, index) => ({
       ...comp,
@@ -39,7 +40,7 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   const componentsSubtotal = components
     .filter(comp => comp.isSelected)
     .reduce((sum, comp) => sum + (comp.price * comp.quantity), 0);
-  const total = componentsSubtotal + laborCost + profitMargin;
+  const total = componentsSubtotal + laborCost + profitMargin + travelExpenses;
 
   const handleComponentChange = (id: string, field: string, value: any) => {
     setComponents(prev => prev.map(comp => 
@@ -67,7 +68,8 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
         area,
         components: components.filter(comp => comp.isSelected),
         laborCost,
-        profitMargin
+        profitMargin,
+        travelExpenses
       }
     };
 
@@ -113,14 +115,17 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
           <AdditionalCostsCard
             laborCost={laborCost}
             profitMargin={profitMargin}
+            travelExpenses={travelExpenses}
             onLaborCostChange={setLaborCost}
             onProfitMarginChange={setProfitMargin}
+            onTravelExpensesChange={setTravelExpenses}
           />
 
           <CostSummaryCard
             componentsSubtotal={componentsSubtotal}
             laborCost={laborCost}
             profitMargin={profitMargin}
+            travelExpenses={travelExpenses}
             glassTypeMultiplier={glassTypeMultiplier}
             total={total}
           />
