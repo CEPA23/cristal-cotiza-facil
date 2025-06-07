@@ -431,19 +431,7 @@ Te envío la cotización de vidriería:
                       className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="travel-expenses">Viáticos (S/.)</Label>
-                    <Input
-                      id="travel-expenses"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={travelExpenses}
-                      onChange={(e) => setTravelExpenses(e.target.value)}
-                      placeholder="0.00"
-                      className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
-                    />
-                  </div>
+                  
                 </div>
               </CardContent>
             </Card>
