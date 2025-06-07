@@ -2,22 +2,15 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Calculator, Save } from 'lucide-react';
 import { TransformableProduct, SERIE_62_COMPONENTS, GLASS_TYPES } from '@/types/product';
-
-interface TransformableProductConfigProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (product: TransformableProduct) => void;
-  productName: string;
-  glassType: string;
-  thickness: number;
-}
+import { TransformableProductConfigProps } from './transformable-config/TransformableProductConfigProps';
+import { GlassInfoCard } from './transformable-config/GlassInfoCard';
+import { BasicConfigCard } from './transformable-config/BasicConfigCard';
+import { AreaDisplayCard } from './transformable-config/AreaDisplayCard';
+import { ComponentsSelectionCard } from './transformable-config/ComponentsSelectionCard';
+import { AdditionalCostsCard } from './transformable-config/AdditionalCostsCard';
+import { CostSummaryCard } from './transformable-config/CostSummaryCard';
 
 export const TransformableProductConfig: React.FC<TransformableProductConfigProps> = ({
   isOpen,
@@ -93,211 +86,45 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Información del vidrio */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Información del Vidrio</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Tipo de Vidrio</Label>
-                <div className="p-2 bg-gray-50 rounded border">
-                  {glassType} (x{glassTypeMultiplier})
-                </div>
-              </div>
-              <div>
-                <Label>Espesor</Label>
-                <div className="p-2 bg-gray-50 rounded border">
-                  {thickness}mm
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <GlassInfoCard 
+            glassType={glassType}
+            thickness={thickness}
+            glassTypeMultiplier={glassTypeMultiplier}
+          />
 
-          {/* Configuración básica */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Configuración Básica</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <Label htmlFor="divisions">Divisiones</Label>
-                <Input
-                  id="divisions"
-                  type="number"
-                  min="1"
-                  value={divisions}
-                  onChange={(e) => setDivisions(parseInt(e.target.value) || 1)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="width">Ancho (m)</Label>
-                <Input
-                  id="width"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={width}
-                  onChange={(e) => setWidth(parseFloat(e.target.value) || 0)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="height">Alto (m)</Label>
-                <Input
-                  id="height"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={height}
-                  onChange={(e) => setHeight(parseFloat(e.target.value) || 0)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="sliding-panels">Hojas Corredizas</Label>
-                <Input
-                  id="sliding-panels"
-                  type="number"
-                  min="1"
-                  value={slidingPanels}
-                  onChange={(e) => setSlidingPanels(parseInt(e.target.value) || 1)}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <BasicConfigCard
+            divisions={divisions}
+            width={width}
+            height={height}
+            slidingPanels={slidingPanels}
+            onDivisionsChange={setDivisions}
+            onWidthChange={setWidth}
+            onHeightChange={setHeight}
+            onSlidingPanelsChange={setSlidingPanels}
+          />
 
-          {/* Área calculada */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <p className="text-lg font-semibold text-blue-600">
-                  Área total: {area.toFixed(2)} m²
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <AreaDisplayCard area={area} />
 
-          {/* Componentes */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Componentes Serie 62</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 max-h-60 overflow-y-auto">
-                {components.map((component) => (
-                  <div key={component.id} className="flex items-center space-x-4 p-3 border rounded">
-                    <Checkbox
-                      checked={component.isSelected}
-                      disabled={component.isRequired}
-                      onCheckedChange={(checked) => 
-                        handleComponentChange(component.id, 'isSelected', checked)
-                      }
-                    />
-                    <div className="flex-1">
-                      <p className="font-medium">{component.name}</p>
-                      {component.isRequired && (
-                        <p className="text-xs text-gray-500">(Requerido)</p>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Label htmlFor={`price-${component.id}`}>Precio:</Label>
-                      <Input
-                        id={`price-${component.id}`}
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={component.price}
-                        onChange={(e) => 
-                          handleComponentChange(component.id, 'price', parseFloat(e.target.value) || 0)
-                        }
-                        className="w-20"
-                        disabled={!component.isSelected}
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Label htmlFor={`qty-${component.id}`}>Cant:</Label>
-                      <Input
-                        id={`qty-${component.id}`}
-                        type="number"
-                        min={component.minQuantity || 1}
-                        value={component.quantity}
-                        onChange={(e) => 
-                          handleComponentChange(component.id, 'quantity', parseInt(e.target.value) || 1)
-                        }
-                        className="w-16"
-                        disabled={!component.isSelected}
-                      />
-                    </div>
-                    <div className="w-20 text-right font-medium">
-                      {component.isSelected ? `S/. ${(component.price * component.quantity).toFixed(2)}` : '-'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <ComponentsSelectionCard
+            components={components}
+            onComponentChange={handleComponentChange}
+          />
 
-          {/* Costos adicionales */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Costos Adicionales</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="labor-cost">Mano de Obra (S/.)</Label>
-                <Input
-                  id="labor-cost"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={laborCost}
-                  onChange={(e) => setLaborCost(parseFloat(e.target.value) || 0)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="profit-margin">Ganancia/Margen (S/.)</Label>
-                <Input
-                  id="profit-margin"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={profitMargin}
-                  onChange={(e) => setProfitMargin(parseFloat(e.target.value) || 0)}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <AdditionalCostsCard
+            laborCost={laborCost}
+            profitMargin={profitMargin}
+            onLaborCostChange={setLaborCost}
+            onProfitMarginChange={setProfitMargin}
+          />
 
-          {/* Resumen */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Resumen de Costos</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between">
-                <span>Subtotal Componentes:</span>
-                <span>S/. {componentsSubtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Mano de Obra:</span>
-                <span>S/. {laborCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Ganancia:</span>
-                <span>S/. {profitMargin.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Multiplicador Vidrio:</span>
-                <span>x{glassTypeMultiplier}</span>
-              </div>
-              <Separator />
-              <div className="flex justify-between text-lg font-bold text-blue-600">
-                <span>Total:</span>
-                <span>S/. {(total * glassTypeMultiplier).toFixed(2)}</span>
-              </div>
-            </CardContent>
-          </Card>
+          <CostSummaryCard
+            componentsSubtotal={componentsSubtotal}
+            laborCost={laborCost}
+            profitMargin={profitMargin}
+            glassTypeMultiplier={glassTypeMultiplier}
+            total={total}
+          />
 
-          {/* Botones */}
           <div className="flex space-x-4">
             <Button variant="outline" onClick={onClose} className="flex-1">
               Cancelar
