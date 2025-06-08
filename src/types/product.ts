@@ -32,6 +32,7 @@ export interface TransformableProduct extends BaseProduct {
     components: Serie62Component[];
     laborCost: number;
     profitMargin: number;
+    travelExpenses: number;
   };
 }
 
