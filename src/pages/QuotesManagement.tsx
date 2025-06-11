@@ -6,11 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Calendar, User, DollarSign, Eye, X, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Calendar, User, DollarSign, Eye, X, AlertCircle, Edit } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Quote } from '@/pages/Index';
 import { useToast } from '@/hooks/use-toast';
 import { QuoteDetail } from '@/components/QuoteDetail';
+import { QuoteEditor } from '@/components/QuoteEditor';
 
 const QuotesManagement = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -18,6 +19,8 @@ const QuotesManagement = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isRejectionDialogOpen, setIsRejectionDialogOpen] = useState(false);
   const [quoteToReject, setQuoteToReject] = useState<string | null>(null);
@@ -35,7 +38,6 @@ const QuotesManagement = () => {
 
   const loadQuotes = () => {
     const storedQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
-    // Already ordered newest first from Index.tsx
     setQuotes(storedQuotes);
   };
 
@@ -106,10 +108,8 @@ const QuotesManagement = () => {
     if (product.type === 'transformable' && product.configuration) {
       return `${product.name} (${product.configuration.width}m × ${product.configuration.height}m)`;
     } else if (product.width && product.height) {
-      // Legacy product format
       return `${product.name} (${product.width}m × ${product.height}m)`;
     } else {
-      // Non-transformable product
       return `${product.name}`;
     }
   };
@@ -119,9 +119,29 @@ const QuotesManagement = () => {
     setIsDetailOpen(true);
   };
 
+  const handleEditQuote = (quote: Quote) => {
+    setEditingQuote(quote);
+    setIsEditorOpen(true);
+  };
+
+  const handleSaveEditedQuote = (updatedQuote: Quote) => {
+    const updatedQuotes = quotes.map(quote =>
+      quote.id === updatedQuote.id ? updatedQuote : quote
+    );
+    
+    setQuotes(updatedQuotes);
+    localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
+    loadQuotes(); // Reload to refresh the display
+  };
+
   const handleCloseDetail = () => {
     setIsDetailOpen(false);
     setSelectedQuote(null);
+  };
+
+  const handleCloseEditor = () => {
+    setIsEditorOpen(false);
+    setEditingQuote(null);
   };
 
   const handleStatusChange = (quoteId: string, newStatus: Quote['status']) => {
@@ -250,6 +270,15 @@ const QuotesManagement = () => {
                         <Eye className="h-4 w-4 mr-1" />
                         Ver Resumen
                       </Button>
+                      <Button
+                        onClick={() => handleEditQuote(quote)}
+                        size="sm"
+                        variant="outline"
+                        className="flex items-center text-blue-600"
+                      >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Editar
+                      </Button>
                       {quote.status === 'Rechazado' && quote.rejectionReason && (
                         <Button
                           onClick={() => handleViewRejectionReason(quote.rejectionReason!)}
@@ -331,6 +360,13 @@ const QuotesManagement = () => {
         quote={selectedQuote}
         isOpen={isDetailOpen}
         onClose={handleCloseDetail}
+      />
+
+      <QuoteEditor
+        quote={editingQuote}
+        isOpen={isEditorOpen}
+        onClose={handleCloseEditor}
+        onSave={handleSaveEditedQuote}
       />
 
       {/* Rejection Dialog */}

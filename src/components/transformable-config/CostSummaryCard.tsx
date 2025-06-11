@@ -6,20 +6,22 @@ import { Separator } from '@/components/ui/separator';
 interface CostSummaryCardProps {
   componentsSubtotal: number;
   laborCost: number;
-  profitMargin: number;
+  profitMarginPercentage: number;
   travelExpenses: number;
   glassTypeMultiplier: number;
-  total: number;
 }
 
 export const CostSummaryCard: React.FC<CostSummaryCardProps> = ({
   componentsSubtotal,
   laborCost,
-  profitMargin,
+  profitMarginPercentage,
   travelExpenses,
-  glassTypeMultiplier,
-  total
+  glassTypeMultiplier
 }) => {
+  const subtotalBeforeProfit = componentsSubtotal + laborCost + travelExpenses;
+  const profitMarginAmount = subtotalBeforeProfit * (profitMarginPercentage / 100);
+  const total = subtotalBeforeProfit + profitMarginAmount;
+  
   return (
     <Card>
       <CardHeader>
@@ -35,12 +37,12 @@ export const CostSummaryCard: React.FC<CostSummaryCardProps> = ({
           <span>S/. {laborCost.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
-          <span>Ganancia:</span>
-          <span>S/. {profitMargin.toFixed(2)}</span>
-        </div>
-        <div className="flex justify-between">
           <span>Viáticos:</span>
           <span>S/. {travelExpenses.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Ganancia ({profitMarginPercentage}%):</span>
+          <span>S/. {profitMarginAmount.toFixed(2)}</span>
         </div>
         <div className="flex justify-between">
           <span>Multiplicador Vidrio:</span>

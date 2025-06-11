@@ -25,7 +25,7 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   const [height, setHeight] = useState(0);
   const [slidingPanels, setSlidingPanels] = useState(2);
   const [laborCost, setLaborCost] = useState(200);
-  const [profitMargin, setProfitMargin] = useState(300);
+  const [profitMarginPercentage, setProfitMarginPercentage] = useState(20);
   const [travelExpenses, setTravelExpenses] = useState(0);
   const [components, setComponents] = useState(
     SERIE_62_COMPONENTS.map((comp, index) => ({
@@ -40,7 +40,10 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   const componentsSubtotal = components
     .filter(comp => comp.isSelected)
     .reduce((sum, comp) => sum + (comp.price * comp.quantity), 0);
-  const total = componentsSubtotal + laborCost + profitMargin + travelExpenses;
+  
+  const subtotalBeforeProfit = componentsSubtotal + laborCost + travelExpenses;
+  const profitMarginAmount = subtotalBeforeProfit * (profitMarginPercentage / 100);
+  const total = subtotalBeforeProfit + profitMarginAmount;
 
   const handleComponentChange = (id: string, field: string, value: any) => {
     setComponents(prev => prev.map(comp => 
@@ -68,7 +71,7 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
         area,
         components: components.filter(comp => comp.isSelected),
         laborCost,
-        profitMargin,
+        profitMargin: profitMarginAmount,
         travelExpenses
       }
     };
@@ -114,20 +117,20 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
 
           <AdditionalCostsCard
             laborCost={laborCost}
-            profitMargin={profitMargin}
+            profitMarginPercentage={profitMarginPercentage}
             travelExpenses={travelExpenses}
+            subtotal={componentsSubtotal}
             onLaborCostChange={setLaborCost}
-            onProfitMarginChange={setProfitMargin}
+            onProfitMarginPercentageChange={setProfitMarginPercentage}
             onTravelExpensesChange={setTravelExpenses}
           />
 
           <CostSummaryCard
             componentsSubtotal={componentsSubtotal}
             laborCost={laborCost}
-            profitMargin={profitMargin}
+            profitMarginPercentage={profitMarginPercentage}
             travelExpenses={travelExpenses}
             glassTypeMultiplier={glassTypeMultiplier}
-            total={total}
           />
 
           <div className="flex space-x-4">
