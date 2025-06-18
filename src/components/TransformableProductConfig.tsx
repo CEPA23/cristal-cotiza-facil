@@ -45,14 +45,23 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
     .reduce((sum, comp) => sum + (comp.price * comp.quantity), 0);
   
   const materialsCost = componentsSubtotal + glassTotalCost;
-  const profitMarginAmount = materialsCost * (profitMarginPercentage / 100);
-  const totalWithProfit = materialsCost + profitMarginAmount + laborCost + travelExpenses;
   
-  // Cálculo de ganancia real
-  const realProfit = agreedPrice > 0 ? agreedPrice - materialsCost : 0;
-  const realProfitPercentage = materialsCost > 0 && agreedPrice > 0 
-    ? (realProfit / materialsCost) * 100 
+  // Calcular ganancia basada en el total de materiales
+  const profitMarginAmount = materialsCost * (profitMarginPercentage / 100);
+  
+  // Costo base sin ganancia (materiales + mano de obra + viáticos)
+  const baseCostWithoutProfit = materialsCost + laborCost + travelExpenses;
+  
+  const totalWithProfit = baseCostWithoutProfit + profitMarginAmount;
+  
+  // Cálculo de ganancia real corregido
+  const realProfit = agreedPrice > 0 ? agreedPrice - baseCostWithoutProfit : 0;
+  const realProfitPercentage = baseCostWithoutProfit > 0 && agreedPrice > 0 
+    ? (realProfit / baseCostWithoutProfit) * 100 
     : 0;
+
+  // Determinar si hay pérdida
+  const isLoss = agreedPrice > 0 && realProfit < 0;
 
   const handleComponentChange = (id: string, field: string, value: any) => {
     setComponents(prev => prev.map(comp => 
@@ -245,6 +254,9 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                   value={profitMarginPercentage}
                   onChange={(e) => setProfitMarginPercentage(parseFloat(e.target.value) || 0)}
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Calculado sobre el total de materiales
+                </p>
               </div>
               <div>
                 <Label htmlFor="travel-expenses">Viáticos (S/.)</Label>
@@ -293,9 +305,15 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                 </div>
               </div>
               <Separator />
-              <div className="flex justify-between text-lg font-bold text-blue-600">
-                <span>Total General:</span>
-                <span>S/. {totalWithProfit.toFixed(2)}</span>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm font-medium text-gray-600">
+                  <span>Costo Base (sin ganancia):</span>
+                  <span>S/. {baseCostWithoutProfit.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold text-blue-600">
+                  <span>Total General:</span>
+                  <span>S/. {totalWithProfit.toFixed(2)}</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -320,22 +338,24 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
               </div>
               
               {agreedPrice > 0 && (
-                <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                  <h4 className="font-medium text-yellow-800 mb-2">Análisis de Ganancia Real</h4>
+                <div className={`p-4 rounded-lg border ${isLoss ? 'bg-red-50 border-red-200' : 'bg-yellow-50 border-yellow-200'}`}>
+                  <h4 className={`font-medium mb-2 ${isLoss ? 'text-red-800' : 'text-yellow-800'}`}>
+                    Análisis de {isLoss ? 'Pérdida' : 'Ganancia'} Real
+                  </h4>
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
-                      <span>Costo Materiales:</span>
-                      <span>S/. {materialsCost.toFixed(2)}</span>
+                      <span>Costo Base (sin ganancia):</span>
+                      <span>S/. {baseCostWithoutProfit.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Precio Pactado:</span>
                       <span>S/. {agreedPrice.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between font-medium">
-                      <span>Ganancia Real:</span>
+                    <div className={`flex justify-between font-medium ${isLoss ? 'text-red-700' : 'text-green-700'}`}>
+                      <span>{isLoss ? 'Pérdida' : 'Ganancia'} Real:</span>
                       <span>S/. {realProfit.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between font-medium text-yellow-800">
+                    <div className={`flex justify-between font-medium ${isLoss ? 'text-red-800' : 'text-yellow-800'}`}>
                       <span>Porcentaje Real:</span>
                       <span>{realProfitPercentage.toFixed(2)}%</span>
                     </div>
