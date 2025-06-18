@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -42,8 +41,8 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
 
   const calculateProductPrice = (product: Product) => {
     if (product.type === 'transformable') {
-      const glassMultiplier = product.glassTypeMultiplier || 1;
-      return product.basePrice * glassMultiplier;
+      // For transformable products, the total cost is already calculated in the configuration
+      return product.configuration.materialsCost + product.configuration.laborCost + product.configuration.profitMargin + product.configuration.travelExpenses;
     }
     const area = product.width * product.height;
     const glassMultiplier = product.glassTypeMultiplier || 1;

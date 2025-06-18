@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -56,8 +55,8 @@ export const QuoteEditor: React.FC<QuoteEditorProps> = ({
 
   const calculateProductPrice = (product: Product) => {
     if (product.type === 'transformable') {
-      const glassMultiplier = product.glassTypeMultiplier || 1;
-      return product.basePrice * glassMultiplier;
+      // For transformable products, the total cost is already calculated in the configuration
+      return product.configuration.materialsCost + product.configuration.laborCost + product.configuration.profitMargin + product.configuration.travelExpenses;
     }
     const area = product.width * product.height;
     const glassMultiplier = product.glassTypeMultiplier || 1;
