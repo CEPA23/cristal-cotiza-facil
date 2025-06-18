@@ -23,6 +23,7 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
   const [slidingPanels, setSlidingPanels] = useState(2);
+  const [quantity, setQuantity] = useState(1);
   const [laborCost, setLaborCost] = useState(200);
   const [profitMarginPercentage, setProfitMarginPercentage] = useState(20);
   const [travelExpenses, setTravelExpenses] = useState(0);
@@ -54,6 +55,10 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   
   const totalWithProfit = baseCostWithoutProfit + profitMarginAmount;
   
+  // Precio por unidad y total por cantidad
+  const pricePerUnit = agreedPrice > 0 ? agreedPrice : totalWithProfit;
+  const totalForQuantity = pricePerUnit * quantity;
+  
   // Cálculo de ganancia real corregido
   const realProfit = agreedPrice > 0 ? agreedPrice - baseCostWithoutProfit : 0;
   const realProfitPercentage = baseCostWithoutProfit > 0 && agreedPrice > 0 
@@ -73,8 +78,8 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
     const product: TransformableProduct = {
       id: `transform-${Date.now()}`,
       name: productName,
-      basePrice: agreedPrice > 0 ? agreedPrice : totalWithProfit,
-      quantity: 1,
+      basePrice: pricePerUnit,
+      quantity,
       unitOfMeasure: 'unidad',
       type: 'transformable',
       glassType,
@@ -147,7 +152,7 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
             <CardHeader>
               <CardTitle>Configuración Básica</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <CardContent className="grid grid-cols-2 md:grid-cols-5 gap-4">
               <div>
                 <Label htmlFor="divisions">Divisiones</Label>
                 <Input
@@ -188,6 +193,16 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                   min="1"
                   value={slidingPanels}
                   onChange={(e) => setSlidingPanels(parseInt(e.target.value) || 1)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="quantity">Cantidad</Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
                 />
               </div>
             </CardContent>
@@ -311,8 +326,12 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                   <span>S/. {baseCostWithoutProfit.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-blue-600">
-                  <span>Total General:</span>
-                  <span>S/. {totalWithProfit.toFixed(2)}</span>
+                  <span>Precio por Unidad:</span>
+                  <span>S/. {pricePerUnit.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-xl font-bold text-green-600 bg-green-50 p-3 rounded-lg">
+                  <span>Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:</span>
+                  <span>S/. {totalForQuantity.toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>
