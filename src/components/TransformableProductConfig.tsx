@@ -46,11 +46,11 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   
   const materialsCost = componentsSubtotal + glassTotalCost;
   
-  // Calcular ganancia basada en el total de materiales
-  const profitMarginAmount = materialsCost * (profitMarginPercentage / 100);
-  
   // Costo base sin ganancia (materiales + mano de obra + viáticos)
   const baseCostWithoutProfit = materialsCost + laborCost + travelExpenses;
+  
+  // Calcular ganancia basada en el costo base total
+  const profitMarginAmount = baseCostWithoutProfit * (profitMarginPercentage / 100);
   
   const totalWithProfit = baseCostWithoutProfit + profitMarginAmount;
   
@@ -255,7 +255,7 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                   onChange={(e) => setProfitMarginPercentage(parseFloat(e.target.value) || 0)}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Calculado sobre el total de materiales
+                  Calculado sobre el total general
                 </p>
               </div>
               <div>
@@ -292,16 +292,16 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                   <span>S/. {materialsCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Ganancia ({profitMarginPercentage}%):</span>
-                  <span>S/. {profitMarginAmount.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
                   <span>Mano de Obra:</span>
                   <span>S/. {laborCost.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Viáticos:</span>
                   <span>S/. {travelExpenses.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Ganancia ({profitMarginPercentage}%):</span>
+                  <span>S/. {profitMarginAmount.toFixed(2)}</span>
                 </div>
               </div>
               <Separator />
