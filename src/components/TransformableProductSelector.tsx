@@ -2,9 +2,11 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Card, CardContent } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
 import { TRANSFORMABLE_PRODUCTS, TRANSFORMABLE_CATEGORIES, MAMPARA_GLASS_TYPES, MAMPARA_GLASS_PRICES } from '@/types/product';
 
@@ -22,6 +24,8 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
   const [selectedGlassType, setSelectedGlassType] = useState('');
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
 
   const filteredProducts = selectedCategory 
     ? TRANSFORMABLE_PRODUCTS.filter(product => product.category === selectedCategory)
@@ -55,6 +59,8 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
       setSelectedCategory('');
       setSelectedProduct('');
       setSelectedGlassType('');
+      setWidth(0);
+      setHeight(0);
     }
   };
 
@@ -86,33 +92,66 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
             </Select>
           </div>
 
-          {/* Buscador de productos */}
+          {/* Lista de productos */}
           {selectedCategory && (
             <div>
-              <Label>Buscar producto</Label>
-              <Command className="border rounded-lg mt-2">
-                <CommandInput placeholder="Buscar producto..." />
-                <CommandList>
-                  <CommandEmpty>No se encontraron productos.</CommandEmpty>
-                  <CommandGroup>
-                    {filteredProducts.map((product) => (
-                      <CommandItem
-                        key={product.name}
-                        value={product.name}
-                        onSelect={() => setSelectedProduct(product.name)}
-                        className={`cursor-pointer ${
+              <Label>Productos disponibles</Label>
+              <div className="grid grid-cols-1 gap-3 mt-2">
+                {filteredProducts.map((product) => (
+                  <Card 
+                    key={product.name}
+                    className={`cursor-pointer transition-colors ${
+                      selectedProduct === product.name 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'hover:border-gray-400'
+                    }`}
+                    onClick={() => setSelectedProduct(product.name)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">{product.name}</h4>
+                          <p className="text-sm text-gray-600">Serie: {product.series}</p>
+                        </div>
+                        <div className={`w-4 h-4 rounded-full border-2 ${
                           selectedProduct === product.name 
+                            ? 'bg-blue-500 border-blue-500' 
+                            : 'border-gray-300'
+                        }`} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Buscador de tipo de vidrio */}
+          {selectedCategory && availableGlassTypes.length > 0 && (
+            <div>
+              <Label>Buscar tipo de vidrio</Label>
+              <Command className="border rounded-lg mt-2">
+                <CommandInput placeholder="Buscar tipo de vidrio..." />
+                <CommandList>
+                  <CommandEmpty>No se encontraron tipos de vidrio.</CommandEmpty>
+                  <CommandGroup>
+                    {availableGlassTypes.map((glass) => (
+                      <CommandItem
+                        key={glass.name}
+                        value={glass.name}
+                        onSelect={() => setSelectedGlassType(glass.name)}
+                        className={`cursor-pointer ${
+                          selectedGlassType === glass.name 
                             ? 'bg-blue-50 text-blue-900' 
                             : ''
                         }`}
                       >
                         <div className="flex items-center justify-between w-full">
                           <div>
-                            <div className="font-medium">{product.name}</div>
-                            <div className="text-sm text-gray-600">Serie: {product.series}</div>
+                            <div className="font-medium">{glass.name}</div>
                           </div>
                           <div className={`w-4 h-4 rounded-full border-2 ${
-                            selectedProduct === product.name 
+                            selectedGlassType === glass.name 
                               ? 'bg-blue-500 border-blue-500' 
                               : 'border-gray-300'
                           }`} />
@@ -125,31 +164,56 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
             </div>
           )}
 
-          {/* Tipo de vidrio - Solo mostrar si hay una categoría seleccionada */}
-          {selectedCategory && availableGlassTypes.length > 0 && (
-            <div>
-              <Label htmlFor="glass-type">Tipo de Vidrio</Label>
-              <Select value={selectedGlassType} onValueChange={setSelectedGlassType}>
-                <SelectTrigger id="glass-type">
-                  <SelectValue placeholder="Seleccionar tipo de vidrio..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableGlassTypes.map((glass) => (
-                    <SelectItem key={glass.name} value={glass.name}>
-                      {glass.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
+          {/* Precio y dimensiones */}
+          {selectedGlassType && (
+            <div className="space-y-4">
               {/* Mostrar precio por m² */}
-              {getGlassPrice() > 0 && (
-                <div className="mt-2 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm font-medium text-blue-800">
-                    Precio: S/. {getGlassPrice().toFixed(2)} por m²
-                  </p>
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <p className="text-sm font-medium text-blue-800">
+                  Precio: S/. {getGlassPrice().toFixed(2)} por m²
+                </p>
+              </div>
+
+              {/* Dimensiones */}
+              <div>
+                <Label className="text-base font-medium">Dimensiones</Label>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <div>
+                    <Label htmlFor="width">Ancho (m)</Label>
+                    <Input
+                      id="width"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={width}
+                      onChange={(e) => setWidth(parseFloat(e.target.value) || 0)}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="height">Alto (m)</Label>
+                    <Input
+                      id="height"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={height}
+                      onChange={(e) => setHeight(parseFloat(e.target.value) || 0)}
+                      placeholder="0.00"
+                    />
+                  </div>
                 </div>
-              )}
+                
+                {/* Mostrar área y precio total */}
+                {width > 0 && height > 0 && (
+                  <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                    <div className="text-sm space-y-1">
+                      <p><span className="font-medium">Área:</span> {(width * height).toFixed(2)} m²</p>
+                      <p><span className="font-medium">Precio total:</span> S/. {(width * height * getGlassPrice()).toFixed(2)}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -160,7 +224,7 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
             </Button>
             <Button 
               onClick={handleContinue}
-              disabled={!selectedProduct || !selectedGlassType}
+              disabled={!selectedProduct || !selectedGlassType || width <= 0 || height <= 0}
               className="bg-blue-600 hover:bg-blue-700"
             >
               Continuar
