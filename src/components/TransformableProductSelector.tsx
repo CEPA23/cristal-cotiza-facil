@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Card, CardContent } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
 import { TRANSFORMABLE_PRODUCTS, TRANSFORMABLE_CATEGORIES, MAMPARA_GLASS_TYPES, MAMPARA_GLASS_PRICES } from '@/types/product';
 
@@ -92,75 +90,41 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
             </Select>
           </div>
 
-          {/* Lista de productos */}
+          {/* Selector de productos */}
           {selectedCategory && (
             <div>
-              <Label>Productos disponibles</Label>
-              <div className="grid grid-cols-1 gap-3 mt-2">
-                {filteredProducts.map((product) => (
-                  <Card 
-                    key={product.name}
-                    className={`cursor-pointer transition-colors ${
-                      selectedProduct === product.name 
-                        ? 'border-blue-500 bg-blue-50' 
-                        : 'hover:border-gray-400'
-                    }`}
-                    onClick={() => setSelectedProduct(product.name)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium">{product.name}</h4>
-                          <p className="text-sm text-gray-600">Serie: {product.series}</p>
-                        </div>
-                        <div className={`w-4 h-4 rounded-full border-2 ${
-                          selectedProduct === product.name 
-                            ? 'bg-blue-500 border-blue-500' 
-                            : 'border-gray-300'
-                        }`} />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <Label htmlFor="product">Producto</Label>
+              <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                <SelectTrigger id="product">
+                  <SelectValue placeholder="Seleccionar producto..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredProducts.map((product) => (
+                    <SelectItem key={product.name} value={product.name}>
+                      {product.name} - Serie: {product.series}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
-          {/* Buscador de tipo de vidrio */}
+          {/* Dropdown para tipo de vidrio */}
           {selectedCategory && availableGlassTypes.length > 0 && (
             <div>
-              <Label>Buscar tipo de vidrio</Label>
-              <Command className="border rounded-lg mt-2">
-                <CommandInput placeholder="Buscar tipo de vidrio..." />
-                <CommandList>
-                  <CommandEmpty>No se encontraron tipos de vidrio.</CommandEmpty>
-                  <CommandGroup>
-                    {availableGlassTypes.map((glass) => (
-                      <CommandItem
-                        key={glass.name}
-                        value={glass.name}
-                        onSelect={() => setSelectedGlassType(glass.name)}
-                        className={`cursor-pointer ${
-                          selectedGlassType === glass.name 
-                            ? 'bg-blue-50 text-blue-900' 
-                            : ''
-                        }`}
-                      >
-                        <div className="flex items-center justify-between w-full">
-                          <div>
-                            <div className="font-medium">{glass.name}</div>
-                          </div>
-                          <div className={`w-4 h-4 rounded-full border-2 ${
-                            selectedGlassType === glass.name 
-                              ? 'bg-blue-500 border-blue-500' 
-                              : 'border-gray-300'
-                          }`} />
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
+              <Label htmlFor="glassType">Tipo de vidrio</Label>
+              <Select value={selectedGlassType} onValueChange={setSelectedGlassType}>
+                <SelectTrigger id="glassType">
+                  <SelectValue placeholder="Seleccionar tipo de vidrio..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableGlassTypes.map((glass) => (
+                    <SelectItem key={glass.name} value={glass.name}>
+                      {glass.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
