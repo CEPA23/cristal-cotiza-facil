@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Settings } from 'lucide-react';
 import { TRANSFORMABLE_PRODUCTS, TRANSFORMABLE_CATEGORIES, MAMPARA_GLASS_TYPES, MAMPARA_GLASS_PRICES } from '@/types/product';
 
@@ -86,38 +86,42 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
             </Select>
           </div>
 
-          {/* Lista de productos */}
+          {/* Buscador de productos */}
           {selectedCategory && (
             <div>
-              <Label>Productos disponibles</Label>
-              <div className="grid grid-cols-1 gap-3 mt-2">
-                {filteredProducts.map((product) => (
-                  <Card 
-                    key={product.name}
-                    className={`cursor-pointer transition-colors ${
-                      selectedProduct === product.name 
-                        ? 'border-blue-500 bg-blue-50' 
-                        : 'hover:border-gray-400'
-                    }`}
-                    onClick={() => setSelectedProduct(product.name)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium">{product.name}</h4>
-                          <p className="text-sm text-gray-600">Serie: {product.series}</p>
-                          <p className="text-sm text-gray-600">Categoría: {product.category}</p>
-                        </div>
-                        <div className={`w-4 h-4 rounded-full border-2 ${
+              <Label>Buscar producto</Label>
+              <Command className="border rounded-lg mt-2">
+                <CommandInput placeholder="Buscar producto..." />
+                <CommandList>
+                  <CommandEmpty>No se encontraron productos.</CommandEmpty>
+                  <CommandGroup>
+                    {filteredProducts.map((product) => (
+                      <CommandItem
+                        key={product.name}
+                        value={product.name}
+                        onSelect={() => setSelectedProduct(product.name)}
+                        className={`cursor-pointer ${
                           selectedProduct === product.name 
-                            ? 'bg-blue-500 border-blue-500' 
-                            : 'border-gray-300'
-                        }`} />
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                            ? 'bg-blue-50 text-blue-900' 
+                            : ''
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div>
+                            <div className="font-medium">{product.name}</div>
+                            <div className="text-sm text-gray-600">Serie: {product.series}</div>
+                          </div>
+                          <div className={`w-4 h-4 rounded-full border-2 ${
+                            selectedProduct === product.name 
+                              ? 'bg-blue-500 border-blue-500' 
+                              : 'border-gray-300'
+                          }`} />
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
             </div>
           )}
 
