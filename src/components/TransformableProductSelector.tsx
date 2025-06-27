@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Settings } from 'lucide-react';
-import { TRANSFORMABLE_PRODUCTS, TRANSFORMABLE_CATEGORIES, MAMPARA_GLASS_TYPES, GLASS_THICKNESS, MAMPARA_GLASS_PRICES } from '@/types/product';
+import { TRANSFORMABLE_PRODUCTS, TRANSFORMABLE_CATEGORIES, MAMPARA_GLASS_TYPES, MAMPARA_GLASS_PRICES } from '@/types/product';
 
 interface TransformableProductSelectorProps {
   isOpen: boolean;
@@ -22,7 +22,6 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
   const [selectedGlassType, setSelectedGlassType] = useState('');
-  const [selectedThickness, setSelectedThickness] = useState<number>(6);
 
   const filteredProducts = selectedCategory 
     ? TRANSFORMABLE_PRODUCTS.filter(product => product.category === selectedCategory)
@@ -35,21 +34,27 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
 
   // Obtener el precio por m² del vidrio seleccionado
   const getGlassPrice = () => {
-    if (selectedCategory === 'Mamparas' && selectedGlassType && selectedThickness) {
-      return MAMPARA_GLASS_PRICES[selectedGlassType]?.[selectedThickness] || 0;
+    if (selectedCategory === 'Mamparas' && selectedGlassType) {
+      return MAMPARA_GLASS_PRICES[selectedGlassType] || 0;
     }
     return 0;
   };
 
+  // Extraer el espesor del nombre del vidrio
+  const getThicknessFromGlassType = (glassType: string): number => {
+    const thicknessMatch = glassType.match(/(\d+)mm/);
+    return thicknessMatch ? parseInt(thicknessMatch[1]) : 6;
+  };
+
   const handleContinue = () => {
     if (selectedProduct && selectedGlassType) {
-      onProductSelect(selectedProduct, selectedGlassType, selectedThickness);
+      const thickness = getThicknessFromGlassType(selectedGlassType);
+      onProductSelect(selectedProduct, selectedGlassType, thickness);
       onClose();
       // Reset form
       setSelectedCategory('');
       setSelectedProduct('');
       setSelectedGlassType('');
-      setSelectedThickness(6);
     }
   };
 
@@ -128,25 +133,6 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                   {availableGlassTypes.map((glass) => (
                     <SelectItem key={glass.name} value={glass.name}>
                       {glass.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Espesor */}
-          {selectedGlassType && (
-            <div>
-              <Label htmlFor="thickness">Espesor del Vidrio</Label>
-              <Select value={selectedThickness.toString()} onValueChange={(value) => setSelectedThickness(Number(value))}>
-                <SelectTrigger id="thickness">
-                  <SelectValue placeholder="Seleccionar espesor..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {GLASS_THICKNESS.map((thickness) => (
-                    <SelectItem key={thickness.thickness} value={thickness.thickness.toString()}>
-                      {thickness.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

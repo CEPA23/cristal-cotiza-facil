@@ -38,7 +38,7 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
 
   // Cálculos automáticos
   const glassArea = width * height;
-  const glassCostPerM2 = MAMPARA_GLASS_PRICES[glassType]?.[thickness] || 0;
+  const glassCostPerM2 = MAMPARA_GLASS_PRICES[glassType] || 0;
   const glassTotalCost = glassArea * glassCostPerM2;
   
   const componentsSubtotal = components
@@ -130,12 +130,6 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                 <Label>Tipo de Vidrio</Label>
                 <div className="p-2 bg-gray-50 rounded border">
                   {glassType}
-                </div>
-              </div>
-              <div>
-                <Label>Espesor</Label>
-                <div className="p-2 bg-gray-50 rounded border">
-                  {thickness}mm
                 </div>
               </div>
               <div>

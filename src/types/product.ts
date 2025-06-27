@@ -68,42 +68,54 @@ export const SERIE_62_COMPONENTS: Omit<Serie62Component, 'id' | 'isSelected'>[] 
   { name: 'Ángulos Martinelli', price: 5.00, quantity: 4, minQuantity: 4, isRequired: true }
 ];
 
-// Tipos de vidrio específicos para mamparas (sin multiplicador)
+// Tipos de vidrio específicos para mamparas con formato correcto
 export const MAMPARA_GLASS_TYPES = [
-  { name: 'Vidrio Crudo', category: 'mampara' },
-  { name: 'Vidrio Templado', category: 'mampara' },
-  { name: 'Vidrio Laminado', category: 'mampara' }
+  { name: 'Vidrio crudo de 3mm', thickness: 3, category: 'mampara' },
+  { name: 'Vidrio crudo de 4mm', thickness: 4, category: 'mampara' },
+  { name: 'Vidrio crudo de 5mm', thickness: 5, category: 'mampara' },
+  { name: 'Vidrio crudo de 6mm', thickness: 6, category: 'mampara' },
+  { name: 'Vidrio crudo de 8mm', thickness: 8, category: 'mampara' },
+  { name: 'Vidrio crudo de 10mm', thickness: 10, category: 'mampara' },
+  { name: 'Vidrio crudo de 12mm', thickness: 12, category: 'mampara' },
+  { name: 'Vidrio templado de 3mm', thickness: 3, category: 'mampara' },
+  { name: 'Vidrio templado de 4mm', thickness: 4, category: 'mampara' },
+  { name: 'Vidrio templado de 5mm', thickness: 5, category: 'mampara' },
+  { name: 'Vidrio templado de 6mm', thickness: 6, category: 'mampara' },
+  { name: 'Vidrio templado de 8mm', thickness: 8, category: 'mampara' },
+  { name: 'Vidrio templado de 10mm', thickness: 10, category: 'mampara' },
+  { name: 'Vidrio templado de 12mm', thickness: 12, category: 'mampara' },
+  { name: 'Vidrio laminado de 3mm', thickness: 3, category: 'mampara' },
+  { name: 'Vidrio laminado de 4mm', thickness: 4, category: 'mampara' },
+  { name: 'Vidrio laminado de 5mm', thickness: 5, category: 'mampara' },
+  { name: 'Vidrio laminado de 6mm', thickness: 6, category: 'mampara' },
+  { name: 'Vidrio laminado de 8mm', thickness: 8, category: 'mampara' },
+  { name: 'Vidrio laminado de 10mm', thickness: 10, category: 'mampara' },
+  { name: 'Vidrio laminado de 12mm', thickness: 12, category: 'mampara' }
 ];
 
-// Precios por espesor y tipo de vidrio para mamparas (en soles por m²)
-export const MAMPARA_GLASS_PRICES: Record<string, Record<number, number>> = {
-  'Vidrio Crudo': {
-    3: 45.00,
-    4: 55.00,
-    5: 65.00,
-    6: 75.00,
-    8: 95.00,
-    10: 115.00,
-    12: 135.00
-  },
-  'Vidrio Templado': {
-    3: 85.00,
-    4: 95.00,
-    5: 105.00,
-    6: 115.00,
-    8: 135.00,
-    10: 155.00,
-    12: 175.00
-  },
-  'Vidrio Laminado': {
-    3: 125.00,
-    4: 135.00,
-    5: 145.00,
-    6: 155.00,
-    8: 175.00,
-    10: 195.00,
-    12: 215.00
-  }
+// Precios por tipo completo de vidrio para mamparas (en soles por m²)
+export const MAMPARA_GLASS_PRICES: Record<string, number> = {
+  'Vidrio crudo de 3mm': 45.00,
+  'Vidrio crudo de 4mm': 55.00,
+  'Vidrio crudo de 5mm': 65.00,
+  'Vidrio crudo de 6mm': 75.00,
+  'Vidrio crudo de 8mm': 95.00,
+  'Vidrio crudo de 10mm': 115.00,
+  'Vidrio crudo de 12mm': 135.00,
+  'Vidrio templado de 3mm': 85.00,
+  'Vidrio templado de 4mm': 95.00,
+  'Vidrio templado de 5mm': 105.00,
+  'Vidrio templado de 6mm': 115.00,
+  'Vidrio templado de 8mm': 135.00,
+  'Vidrio templado de 10mm': 155.00,
+  'Vidrio templado de 12mm': 175.00,
+  'Vidrio laminado de 3mm': 125.00,
+  'Vidrio laminado de 4mm': 135.00,
+  'Vidrio laminado de 5mm': 145.00,
+  'Vidrio laminado de 6mm': 155.00,
+  'Vidrio laminado de 8mm': 175.00,
+  'Vidrio laminado de 10mm': 195.00,
+  'Vidrio laminado de 12mm': 215.00
 };
 
 export const GLASS_TYPES = [
