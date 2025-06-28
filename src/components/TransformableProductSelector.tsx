@@ -5,10 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Settings, Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Settings } from 'lucide-react';
 import { TRANSFORMABLE_PRODUCTS, TRANSFORMABLE_CATEGORIES, MAMPARA_GLASS_TYPES, MAMPARA_GLASS_PRICES } from '@/types/product';
 
 interface TransformableProductSelectorProps {
@@ -25,7 +22,6 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedProduct, setSelectedProduct] = useState('');
   const [selectedGlassType, setSelectedGlassType] = useState('');
-  const [openGlassTypeCombobox, setOpenGlassTypeCombobox] = useState(false);
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
 
@@ -61,16 +57,14 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
       setSelectedCategory('');
       setSelectedProduct('');
       setSelectedGlassType('');
-      setOpenGlassTypeCombobox(false);
       setWidth(0);
       setHeight(0);
     }
   };
 
-  const handleGlassTypeSelect = (glass: typeof MAMPARA_GLASS_TYPES[0]) => {
-    console.log('Selecting glass type:', glass.name);
-    setSelectedGlassType(glass.name);
-    setOpenGlassTypeCombobox(false);
+  const handleGlassTypeChange = (glassTypeName: string) => {
+    console.log('Glass type selected:', glassTypeName);
+    setSelectedGlassType(glassTypeName);
   };
 
   return (
@@ -120,51 +114,22 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
             </div>
           )}
 
-          {/* Combobox para tipo de vidrio */}
+          {/* Selector de tipo de vidrio */}
           {selectedCategory && availableGlassTypes.length > 0 && (
             <div>
               <Label htmlFor="glassType">Tipo de vidrio</Label>
-              <Popover open={openGlassTypeCombobox} onOpenChange={setOpenGlassTypeCombobox}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openGlassTypeCombobox}
-                    className="w-full justify-between"
-                  >
-                    {selectedGlassType || "Seleccionar tipo de vidrio..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput 
-                      placeholder="Buscar tipo de vidrio..." 
-                      className="h-9"
-                    />
-                    <CommandList className="max-h-[200px]">
-                      <CommandEmpty>No se encontró ningún tipo de vidrio.</CommandEmpty>
-                      <CommandGroup>
-                        {availableGlassTypes.map((glass) => (
-                          <CommandItem
-                            key={glass.name}
-                            value={glass.name}
-                            onSelect={() => handleGlassTypeSelect(glass)}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                selectedGlassType === glass.name ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {glass.name}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <Select value={selectedGlassType} onValueChange={handleGlassTypeChange}>
+                <SelectTrigger id="glassType">
+                  <SelectValue placeholder="Seleccionar tipo de vidrio..." />
+                </SelectTrigger>
+                <SelectContent className="max-h-[200px] overflow-y-auto">
+                  {availableGlassTypes.map((glass) => (
+                    <SelectItem key={glass.name} value={glass.name}>
+                      {glass.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
