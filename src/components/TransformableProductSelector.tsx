@@ -67,6 +67,12 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
     }
   };
 
+  const handleGlassTypeSelect = (glass: typeof MAMPARA_GLASS_TYPES[0]) => {
+    console.log('Selecting glass type:', glass.name);
+    setSelectedGlassType(glass.name);
+    setOpenGlassTypeCombobox(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
@@ -143,11 +149,7 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                           <CommandItem
                             key={glass.name}
                             value={glass.name}
-                            onSelect={(currentValue) => {
-                              console.log('Selecting glass type:', currentValue);
-                              setSelectedGlassType(currentValue === selectedGlassType ? "" : currentValue);
-                              setOpenGlassTypeCombobox(false);
-                            }}
+                            onSelect={() => handleGlassTypeSelect(glass)}
                           >
                             <Check
                               className={cn(
