@@ -130,31 +130,40 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[var(--radix-popover-trigger-width)] max-h-[300px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Buscar tipo de vidrio..." className="h-9" />
-                    <CommandList>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command shouldFilter={false}>
+                    <CommandInput 
+                      placeholder="Buscar tipo de vidrio..." 
+                      className="h-9"
+                    />
+                    <CommandList className="max-h-[200px]">
                       <CommandEmpty>No se encontró ningún tipo de vidrio.</CommandEmpty>
                       <CommandGroup>
-                        {availableGlassTypes.map((glass) => (
-                          <CommandItem
-                            key={glass.name}
-                            value={glass.name}
-                            onSelect={(value) => {
-                              console.log('Selected glass type:', value);
-                              setSelectedGlassType(value);
-                              setOpenGlassTypeCombobox(false);
-                            }}
-                          >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                selectedGlassType === glass.name ? "opacity-100" : "opacity-0"
-                              )}
-                            />
-                            {glass.name}
-                          </CommandItem>
-                        ))}
+                        {availableGlassTypes
+                          .filter((glass) => 
+                            glass.name.toLowerCase().includes(
+                              document.querySelector('[cmdk-input]')?.value?.toLowerCase() || ''
+                            )
+                          )
+                          .map((glass) => (
+                            <CommandItem
+                              key={glass.name}
+                              value={glass.name}
+                              onSelect={() => {
+                                console.log('Selecting glass type:', glass.name);
+                                setSelectedGlassType(glass.name);
+                                setOpenGlassTypeCombobox(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedGlassType === glass.name ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {glass.name}
+                            </CommandItem>
+                          ))}
                       </CommandGroup>
                     </CommandList>
                   </Command>
