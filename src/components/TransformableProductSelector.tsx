@@ -126,13 +126,11 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                     aria-expanded={openGlassTypeCombobox}
                     className="w-full justify-between"
                   >
-                    {selectedGlassType
-                      ? availableGlassTypes.find((glass) => glass.name === selectedGlassType)?.name
-                      : "Seleccionar tipo de vidrio..."}
+                    {selectedGlassType || "Seleccionar tipo de vidrio..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
+                <PopoverContent className="w-[--radix-popover-trigger-width] max-h-[200px] p-0">
                   <Command>
                     <CommandInput placeholder="Buscar tipo de vidrio..." />
                     <CommandList>
@@ -142,8 +140,8 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                           <CommandItem
                             key={glass.name}
                             value={glass.name}
-                            onSelect={(currentValue) => {
-                              setSelectedGlassType(currentValue === selectedGlassType ? "" : currentValue);
+                            onSelect={() => {
+                              setSelectedGlassType(glass.name);
                               setOpenGlassTypeCombobox(false);
                             }}
                           >
