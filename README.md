@@ -1,50 +1,58 @@
-# Welcome 
+Bienvenido
 
-Changes made via Lovable will be committed automatically to this repo.
+Los cambios realizados mediante Lovable se confirmarán automáticamente en este repositorio.
 
-**Use your preferred IDE**
+Usa tu IDE preferido
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Si deseas trabajar de manera local usando tu propio IDE, puedes clonar este repositorio y hacer push de los cambios. Los cambios enviados también se reflejarán en Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+El único requisito es tener Node.js y npm instalados — instálalos con nvm
 
-Follow these steps:
+Sigue estos pasos:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Paso 1: Clona el repositorio usando la URL Git del proyecto.
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Paso 2: Entra al directorio del proyecto.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Paso 3: Instala las dependencias necesarias.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Paso 4: Inicia el servidor de desarrollo con autorecarga y vista previa instantánea.
 npm run dev
-```
 
-**Edit a file directly in GitHub**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Editar un archivo directamente en GitHub
 
-**Use GitHub Codespaces**
+Navega al archivo deseado.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Haz clic en el botón "Edit" (icono de lápiz) en la parte superior derecha de la vista del archivo.
 
-## What technologies are used for this project?
+Realiza tus cambios y confírmalos (commit).
 
-This project is built with:
+Usar GitHub Codespaces
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Ve a la página principal de tu repositorio.
 
+Haz clic en el botón "Code" (botón verde) cerca de la parte superior derecha.
+
+Selecciona la pestaña "Codespaces".
+
+Haz clic en "New codespace" para lanzar un nuevo entorno Codespace.
+
+Edita archivos directamente dentro del Codespace y realiza commit y push de tus cambios cuando termines.
+
+¿Qué tecnologías se utilizan en este proyecto?
+
+Este proyecto está construido con:
+
+Vite
+
+TypeScript
+
+React
+
+shadcn-ui
+
+Tailwind CSS
