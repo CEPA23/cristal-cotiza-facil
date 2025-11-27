@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 import { Package, Save } from 'lucide-react';
-import { NonTransformableProduct, NON_TRANSFORMABLE_PRODUCTS, GLASS_TYPES, GLASS_THICKNESS } from '@/types/product';
+import { NonTransformableProduct, NON_TRANSFORMABLE_PRODUCTS } from '@/types/product';
 
 interface NonTransformableProductConfigProps {
   isOpen: boolean;
@@ -26,8 +26,6 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
   const [unitOfMeasure, setUnitOfMeasure] = useState('');
   const [width, setWidth] = useState(1);
   const [height, setHeight] = useState(1);
-  const [glassType, setGlassType] = useState('');
-  const [thickness, setThickness] = useState(6);
 
   const handleProductSelect = (productName: string) => {
     const product = NON_TRANSFORMABLE_PRODUCTS.find(p => p.name === productName);
@@ -39,9 +37,7 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
   };
 
   const handleSave = () => {
-    if (!selectedProduct || !glassType) return;
-
-    const glassTypeData = GLASS_TYPES.find(gt => gt.name === glassType);
+    if (!selectedProduct) return;
 
     const product: NonTransformableProduct = {
       id: `non-transform-${Date.now()}`,
@@ -51,10 +47,7 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
       unitOfMeasure,
       type: 'no-transformable',
       width,
-      height,
-      glassType,
-      thickness,
-      glassTypeMultiplier: glassTypeData?.multiplier || 1
+      height
     };
 
     onSave(product);
@@ -67,14 +60,10 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
     setUnitOfMeasure('');
     setWidth(1);
     setHeight(1);
-    setGlassType('');
-    setThickness(6);
   };
 
   const area = width * height;
-  const glassTypeData = GLASS_TYPES.find(gt => gt.name === glassType);
-  const finalPrice = price * (glassTypeData?.multiplier || 1);
-  const total = finalPrice * area * quantity;
+  const total = price * area * quantity;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -106,44 +95,6 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
                 ))}
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="glass-type">Tipo de Vidrio</Label>
-              <Select value={glassType} onValueChange={setGlassType} disabled={!selectedProduct}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar tipo..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {GLASS_TYPES.map((type) => (
-                    <SelectItem key={type.name} value={type.name}>
-                      <div>
-                        <div className="font-medium">{type.name}</div>
-                        <div className="text-xs text-gray-500">
-                          x{type.multiplier}
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="thickness">Grosor</Label>
-              <Select value={thickness.toString()} onValueChange={(value) => setThickness(parseInt(value))} disabled={!selectedProduct}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Grosor..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {GLASS_THICKNESS.map((t) => (
-                    <SelectItem key={t.thickness} value={t.thickness.toString()}>
-                      {t.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -198,25 +149,17 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
             />
           </div>
 
-          {selectedProduct && glassType && (
+          {selectedProduct && (
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span>Tipo:</span>
-                    <span>{glassType} ({thickness}mm)</span>
-                  </div>
                   <div className="flex justify-between">
                     <span>Área:</span>
                     <span>{area.toFixed(2)} m²</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Precio base por m²:</span>
+                    <span>Precio por m²:</span>
                     <span>S/. {price.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Precio final por m²:</span>
-                    <span>S/. {finalPrice.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Cantidad:</span>
@@ -239,7 +182,7 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
             </Button>
             <Button 
               onClick={handleSave} 
-              disabled={!selectedProduct || !glassType}
+              disabled={!selectedProduct}
               className="flex-1"
             >
               <Save className="h-4 w-4 mr-2" />
