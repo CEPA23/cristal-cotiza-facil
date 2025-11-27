@@ -53,8 +53,7 @@ const Index = () => {
         return total + product.basePrice;
       }
       const area = product.width * product.height;
-      const glassMultiplier = product.glassTypeMultiplier || 1;
-      return total + (product.basePrice * glassMultiplier * area * product.quantity);
+      return total + (product.basePrice * area * product.quantity);
     }, 0);
   };
 

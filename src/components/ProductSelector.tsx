@@ -45,8 +45,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
       return product.configuration.materialsCost + product.configuration.laborCost + product.configuration.profitMargin + product.configuration.travelExpenses;
     }
     const area = product.width * product.height;
-    const glassMultiplier = product.glassTypeMultiplier || 1;
-    return product.basePrice * area * product.quantity * glassMultiplier;
+    return product.basePrice * area * product.quantity;
   };
 
   const transformableProducts = products.filter(p => p.type === 'transformable');
@@ -150,13 +149,10 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
                   <Card key={product.id} className="shadow-sm hover:shadow-md transition-shadow duration-200">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-center">
-                        <div className="flex-1">
+                         <div className="flex-1">
                           <h4 className="font-medium text-gray-800">{product.name}</h4>
                           <p className="text-sm text-gray-600">
                             Dimensiones: {product.width}m × {product.height}m | Cantidad: {product.quantity} {product.unitOfMeasure}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Tipo de vidrio: {product.glassType} | Espesor: {product.thickness}mm
                           </p>
                           <p className="text-lg font-bold text-green-600 mt-1">
                             S/. {calculateProductPrice(product).toFixed(2)}

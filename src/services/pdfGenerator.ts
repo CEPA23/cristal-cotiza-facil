@@ -30,8 +30,7 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
     }
     // For non-transformable products, calculate based on area
     const area = product.width * product.height;
-    const glassMultiplier = product.glassTypeMultiplier || 1;
-    return product.basePrice * glassMultiplier * area * product.quantity;
+    return product.basePrice * area * product.quantity;
   };
 
   const subtotal = products.reduce((sum, product) => sum + calculateProductPrice(product), 0);
@@ -120,7 +119,7 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
                     <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">
                       ${isTransformable ? 
                         'Configuración personalizada' : 
-                        `${product.width}m × ${product.height}m<br><small style="color: #6b7280;">(${(product.width * product.height).toFixed(2)}m²)</small><br><small style="color: #6b7280;">${product.glassType} - ${product.thickness}mm</small>`
+                        `${product.width}m × ${product.height}m<br><small style="color: #6b7280;">(${(product.width * product.height).toFixed(2)}m²)</small>`
                       }
                     </td>
                     <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">${product.quantity}</td>

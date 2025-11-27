@@ -36,10 +36,9 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
       // For transformable products, the total cost is already calculated in the configuration
       return product.configuration.materialsCost + product.configuration.laborCost + product.configuration.profitMargin + product.configuration.travelExpenses;
     }
-    // For non-transformable products, calculate based on area and glass type multiplier
+    // For non-transformable products, calculate based on area
     const area = product.width * product.height;
-    const glassMultiplier = product.glassTypeMultiplier || 1;
-    return product.basePrice * area * product.quantity * glassMultiplier;
+    return product.basePrice * area * product.quantity;
   };
 
   if (!customer && products.length === 0) {
@@ -169,8 +168,6 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
                           <>
                             <p>Dimensiones: {product.width}m × {product.height}m = {(product.width * product.height).toFixed(2)}m²</p>
                             <p>Cantidad: {product.quantity} unidad{product.quantity > 1 ? 'es' : ''}</p>
-                            <p>Tipo de vidrio: {product.glassType}</p>
-                            <p>Grosor: {product.thickness}mm</p>
                             <p>Precio base: S/. {product.basePrice}/m²</p>
                             <p className="font-semibold text-blue-600 print:text-black">
                               Total: S/. {productTotal.toFixed(2)}

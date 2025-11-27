@@ -59,8 +59,7 @@ export const QuoteEditor: React.FC<QuoteEditorProps> = ({
       return product.configuration.materialsCost + product.configuration.laborCost + product.configuration.profitMargin + product.configuration.travelExpenses;
     }
     const area = product.width * product.height;
-    const glassMultiplier = product.glassTypeMultiplier || 1;
-    return product.basePrice * glassMultiplier * area * product.quantity;
+    return product.basePrice * area * product.quantity;
   };
 
   const calculateTotal = () => {
@@ -232,8 +231,6 @@ export const QuoteEditor: React.FC<QuoteEditorProps> = ({
                             <>
                               <span>Dimensiones: {product.width}m × {product.height}m</span>
                               <span>Área: {(product.width * product.height).toFixed(2)}m²</span>
-                              <span>Vidrio: {product.glassType}</span>
-                              <span>Espesor: {product.thickness}mm</span>
                             </>
                           )}
                         </div>
