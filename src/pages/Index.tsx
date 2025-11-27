@@ -46,7 +46,9 @@ const Index = () => {
       if (product.type === 'transformable') {
         return total + product.basePrice;
       }
-      return total + (product.basePrice * product.quantity);
+      const area = product.width * product.height;
+      const glassMultiplier = product.glassTypeMultiplier || 1;
+      return total + (product.basePrice * glassMultiplier * area * product.quantity);
     }, 0);
   };
 

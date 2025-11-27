@@ -42,19 +42,19 @@ export const NonTransformableProductConfig: React.FC<NonTransformableProductConf
     if (!selectedProduct || !glassType) return;
 
     const glassTypeData = GLASS_TYPES.find(gt => gt.name === glassType);
-    const finalPrice = price * (glassTypeData?.multiplier || 1);
 
     const product: NonTransformableProduct = {
       id: `non-transform-${Date.now()}`,
       name: selectedProduct,
-      basePrice: finalPrice,
+      basePrice: price,
       quantity,
       unitOfMeasure,
       type: 'no-transformable',
       width,
       height,
       glassType,
-      thickness
+      thickness,
+      glassTypeMultiplier: glassTypeData?.multiplier || 1
     };
 
     onSave(product);
