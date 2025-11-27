@@ -14,7 +14,109 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          address: string | null
+          company: string | null
+          created_at: string | null
+          dni: string
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          address?: string | null
+          company?: string | null
+          created_at?: string | null
+          dni: string
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          address?: string | null
+          company?: string | null
+          created_at?: string | null
+          dni?: string
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      quote_products: {
+        Row: {
+          created_at: string | null
+          id: string
+          product_data: Json
+          quote_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          product_data: Json
+          quote_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          product_data?: Json
+          quote_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_products_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          created_at: string | null
+          customer_id: string | null
+          date: string
+          id: string
+          rejection_reason: string | null
+          seller: string | null
+          status: string
+          total: number
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id?: string | null
+          date: string
+          id: string
+          rejection_reason?: string | null
+          seller?: string | null
+          status: string
+          total: number
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string | null
+          date?: string
+          id?: string
+          rejection_reason?: string | null
+          seller?: string | null
+          status?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotes_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Building2, Download, Printer, MessageSquare } from 'lucide-react';
 import { downloadQuotePDF, generateQuotePDF } from '@/services/pdfGenerator';
 import { Product } from '@/types/product';
+import { quotesService } from '@/services/quotesService';
 
 export interface Customer {
   dni: string;
@@ -39,7 +40,12 @@ const Index = () => {
   const [shippingCost, setShippingCost] = useState('0');
   const [travelExpenses, setTravelExpenses] = useState('0');
   const [seller, setSeller] = useState('Carlos Porras');
+  const [quotes, setQuotes] = useState<Quote[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    loadQuotes();
+  }, []);
 
   const calculateTotal = () => {
     return products.reduce((total, product) => {
@@ -52,8 +58,14 @@ const Index = () => {
     }, 0);
   };
 
+  const loadQuotes = async () => {
+    const { data, error } = await quotesService.getAllQuotes();
+    if (data && !error) {
+      setQuotes(data);
+    }
+  };
+
   const getQuotesSummary = () => {
-    const quotes = JSON.parse(localStorage.getItem('quotes') || '[]') as Quote[];
     const approved = quotes.filter(q => q.status === 'Aprobado').length;
     const pending = quotes.filter(q => q.status === 'En espera').length;
     const totalSales = quotes
@@ -91,45 +103,52 @@ const Index = () => {
 
     setIsGeneratingPDF(true);
     
-    // Simular generación de PDF
-    setTimeout(() => {
-      const quote: Quote = {
-        id: `COT-${Date.now()}`,
-        customer,
-        products,
-        date: new Date().toLocaleDateString('es-PE'),
-        total: calculateTotal() + parseFloat(shippingCost || '0') + parseFloat(travelExpenses || '0'),
-        status: 'En espera',
-        seller
-      };
+    const quote: Quote = {
+      id: `COT-${Date.now()}`,
+      customer,
+      products,
+      date: new Date().toLocaleDateString('es-PE'),
+      total: calculateTotal() + parseFloat(shippingCost || '0') + parseFloat(travelExpenses || '0'),
+      status: 'En espera',
+      seller
+    };
 
-      // Guardar en localStorage - newest first
-      const existingQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
-      localStorage.setItem('quotes', JSON.stringify([quote, ...existingQuotes]));
+    const { error } = await quotesService.createQuote(quote);
 
+    if (error) {
       toast({
-        title: "Cotización generada",
-        description: `Cotización ${quote.id} creada exitosamente.`,
-        action: (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="text-blue-600 border-blue-300 hover:bg-blue-50"
-            onClick={() => window.location.href = '/quotes'}
-          >
-            Ver Cotizaciones
-          </Button>
-        ),
+        title: "Error",
+        description: "No se pudo guardar la cotización. Por favor intenta de nuevo.",
+        variant: "destructive"
       });
-
-      // Clear form data
-      setProducts([]);
-      setCustomer(null);
-      setShippingService('');
-      setShippingCost('0');
-      setTravelExpenses('0');
       setIsGeneratingPDF(false);
-    }, 2000);
+      return;
+    }
+
+    await loadQuotes();
+
+    toast({
+      title: "Cotización generada",
+      description: `Cotización ${quote.id} creada exitosamente.`,
+      action: (
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="text-blue-600 border-blue-300 hover:bg-blue-50"
+          onClick={() => window.location.href = '/quotes'}
+        >
+          Ver Cotizaciones
+        </Button>
+      ),
+    });
+
+    // Clear form data
+    setProducts([]);
+    setCustomer(null);
+    setShippingService('');
+    setShippingCost('0');
+    setTravelExpenses('0');
+    setIsGeneratingPDF(false);
   };
 
   const handleDownloadPDF = async () => {
