@@ -12,6 +12,7 @@ import { Quote } from '@/pages/Index';
 import { useToast } from '@/hooks/use-toast';
 import { QuoteDetail } from '@/components/QuoteDetail';
 import { QuoteEditor } from '@/components/QuoteEditor';
+import { quotesService } from '@/services/quotesService';
 
 const QuotesManagement = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -36,9 +37,17 @@ const QuotesManagement = () => {
     filterQuotes();
   }, [quotes, statusFilter]);
 
-  const loadQuotes = () => {
-    const storedQuotes = JSON.parse(localStorage.getItem('quotes') || '[]');
-    setQuotes(storedQuotes);
+  const loadQuotes = async () => {
+    const { data, error } = await quotesService.getAllQuotes();
+    if (data && !error) {
+      setQuotes(data);
+    } else if (error) {
+      toast({
+        title: "Error",
+        description: "No se pudieron cargar las cotizaciones.",
+        variant: "destructive"
+      });
+    }
   };
 
   const filterQuotes = () => {
@@ -49,17 +58,19 @@ const QuotesManagement = () => {
     }
   };
 
-  const updateQuoteStatus = (quoteId: string, newStatus: Quote['status'], reason?: string) => {
-    const updatedQuotes = quotes.map(quote => 
-      quote.id === quoteId ? { 
-        ...quote, 
-        status: newStatus,
-        rejectionReason: newStatus === 'Rechazado' ? reason : undefined
-      } : quote
-    );
+  const updateQuoteStatus = async (quoteId: string, newStatus: Quote['status'], reason?: string) => {
+    const { error } = await quotesService.updateQuoteStatus(quoteId, newStatus, reason);
     
-    setQuotes(updatedQuotes);
-    localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
+    if (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar el estado de la cotización.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    await loadQuotes();
     
     toast({
       title: "Estado actualizado",
@@ -124,14 +135,19 @@ const QuotesManagement = () => {
     setIsEditorOpen(true);
   };
 
-  const handleSaveEditedQuote = (updatedQuote: Quote) => {
-    const updatedQuotes = quotes.map(quote =>
-      quote.id === updatedQuote.id ? updatedQuote : quote
-    );
+  const handleSaveEditedQuote = async (updatedQuote: Quote) => {
+    const { error } = await quotesService.updateQuote(updatedQuote);
     
-    setQuotes(updatedQuotes);
-    localStorage.setItem('quotes', JSON.stringify(updatedQuotes));
-    loadQuotes(); // Reload to refresh the display
+    if (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo actualizar la cotización.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    await loadQuotes();
   };
 
   const handleCloseDetail = () => {
