@@ -60,7 +60,7 @@ export const QuoteEditor: React.FC<QuoteEditorProps> = ({
     }
     const area = product.width * product.height;
     const glassMultiplier = product.glassTypeMultiplier || 1;
-    return product.basePrice * area * product.quantity * glassMultiplier;
+    return product.basePrice * glassMultiplier * area * product.quantity;
   };
 
   const calculateTotal = () => {
