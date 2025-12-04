@@ -23,6 +23,9 @@ interface TransformableProductSelectorProps {
     lockType?: string;
     frameType?: string;
     openingSystem?: string;
+    width?: number;
+    height?: number;
+    glassPrice?: number;
   }) => void;
 }
 
@@ -85,12 +88,20 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
   const handleContinue = () => {
     if (canContinue()) {
       const thickness = getThicknessFromGlassType(selectedGlassType);
+      const glassPrice = getGlassPrice();
       
       const extraConfig: {
         lockType?: string;
         frameType?: string;
         openingSystem?: string;
-      } = {};
+        width?: number;
+        height?: number;
+        glassPrice?: number;
+      } = {
+        width,
+        height,
+        glassPrice
+      };
       
       if (selectedCategory === 'Puertas') {
         extraConfig.lockType = lockType;
