@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Calendar, User, DollarSign, Eye, X, AlertCircle, Edit } from 'lucide-react';
+import { ArrowLeft, Calendar, User, DollarSign, Eye, X, AlertCircle, Edit, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Quote } from '@/pages/Index';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +19,7 @@ const QuotesManagement = () => {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [filteredQuotes, setFilteredQuotes] = useState<Quote[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dniSearch, setDniSearch] = useState<string>('');
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -35,7 +37,7 @@ const QuotesManagement = () => {
 
   useEffect(() => {
     filterQuotes();
-  }, [quotes, statusFilter]);
+  }, [quotes, statusFilter, dniSearch]);
 
   const loadQuotes = async () => {
     const { data, error } = await quotesService.getAllQuotes();
@@ -51,11 +53,21 @@ const QuotesManagement = () => {
   };
 
   const filterQuotes = () => {
-    if (statusFilter === 'all') {
-      setFilteredQuotes(quotes);
-    } else {
-      setFilteredQuotes(quotes.filter(quote => quote.status === statusFilter));
+    let filtered = quotes;
+    
+    // Filtrar por estado
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(quote => quote.status === statusFilter);
     }
+    
+    // Filtrar por DNI
+    if (dniSearch.trim()) {
+      filtered = filtered.filter(quote => 
+        quote.customer.dni.toLowerCase().includes(dniSearch.toLowerCase().trim())
+      );
+    }
+    
+    setFilteredQuotes(filtered);
   };
 
   const updateQuoteStatus = async (quoteId: string, newStatus: Quote['status'], reason?: string) => {
@@ -225,8 +237,17 @@ const QuotesManagement = () => {
             </Card>
           </div>
 
-          {/* Filter */}
-          <div className="flex justify-between items-center">
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+            <div className="relative flex-1 max-w-xs">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Buscar por DNI..."
+                value={dniSearch}
+                onChange={(e) => setDniSearch(e.target.value)}
+                className="pl-10"
+              />
+            </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-48">
                 <SelectValue placeholder="Filtrar por estado" />

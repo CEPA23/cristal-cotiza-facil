@@ -20,10 +20,32 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
     productName: string;
     glassType: string;
     thickness: number;
+    category?: 'Mamparas' | 'Puertas' | 'Ventanas';
+    extraConfig?: {
+      lockType?: string;
+      frameType?: string;
+      openingSystem?: string;
+    };
   } | null>(null);
 
-  const handleTransformableProductSelect = (productName: string, glassType: string, thickness: number) => {
-    setSelectedTransformableData({ productName, glassType, thickness });
+  const handleTransformableProductSelect = (
+    productName: string, 
+    glassType: string, 
+    thickness: number, 
+    category: string,
+    extraConfig?: {
+      lockType?: string;
+      frameType?: string;
+      openingSystem?: string;
+    }
+  ) => {
+    setSelectedTransformableData({ 
+      productName, 
+      glassType, 
+      thickness, 
+      category: category as 'Mamparas' | 'Puertas' | 'Ventanas',
+      extraConfig 
+    });
     setShowTransformableConfig(true);
   };
 
@@ -194,6 +216,8 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
           productName={selectedTransformableData.productName}
           glassType={selectedTransformableData.glassType}
           thickness={selectedTransformableData.thickness}
+          category={selectedTransformableData.category}
+          extraConfig={selectedTransformableData.extraConfig}
         />
       )}
 

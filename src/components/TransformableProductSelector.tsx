@@ -6,12 +6,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Settings } from 'lucide-react';
-import { TRANSFORMABLE_PRODUCTS, TRANSFORMABLE_CATEGORIES, MAMPARA_GLASS_TYPES, MAMPARA_GLASS_PRICES } from '@/types/product';
+import { 
+  TRANSFORMABLE_PRODUCTS, 
+  TRANSFORMABLE_CATEGORIES, 
+  MAMPARA_GLASS_TYPES, 
+  MAMPARA_GLASS_PRICES,
+  LOCK_TYPES,
+  FRAME_TYPES,
+  OPENING_SYSTEMS
+} from '@/types/product';
 
 interface TransformableProductSelectorProps {
   isOpen: boolean;
   onClose: () => void;
-  onProductSelect: (productName: string, glassType: string, thickness: number) => void;
+  onProductSelect: (productName: string, glassType: string, thickness: number, category: string, extraConfig?: {
+    lockType?: string;
+    frameType?: string;
+    openingSystem?: string;
+  }) => void;
 }
 
 export const TransformableProductSelector: React.FC<TransformableProductSelectorProps> = ({
@@ -24,19 +36,24 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
   const [selectedGlassType, setSelectedGlassType] = useState('');
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
+  
+  // Campos para Puertas
+  const [lockType, setLockType] = useState('');
+  const [frameType, setFrameType] = useState('');
+  
+  // Campos para Ventanas
+  const [openingSystem, setOpeningSystem] = useState('');
 
   const filteredProducts = selectedCategory 
     ? TRANSFORMABLE_PRODUCTS.filter(product => product.category === selectedCategory)
     : TRANSFORMABLE_PRODUCTS;
 
   // Determinar qué tipos de vidrio mostrar según la categoría
-  const availableGlassTypes = selectedCategory === 'Mamparas' 
-    ? MAMPARA_GLASS_TYPES 
-    : [];
+  const availableGlassTypes = MAMPARA_GLASS_TYPES;
 
   // Obtener el precio por m² del vidrio seleccionado
   const getGlassPrice = () => {
-    if (selectedCategory === 'Mamparas' && selectedGlassType) {
+    if (selectedGlassType) {
       return MAMPARA_GLASS_PRICES[selectedGlassType] || 0;
     }
     return 0;
@@ -48,18 +65,59 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
     return thicknessMatch ? parseInt(thicknessMatch[1]) : 6;
   };
 
+  const canContinue = () => {
+    if (!selectedProduct || !selectedGlassType || width <= 0 || height <= 0) {
+      return false;
+    }
+    
+    // Validaciones específicas por categoría
+    if (selectedCategory === 'Puertas' && (!lockType || !frameType)) {
+      return false;
+    }
+    
+    if (selectedCategory === 'Ventanas' && (!frameType || !openingSystem)) {
+      return false;
+    }
+    
+    return true;
+  };
+
   const handleContinue = () => {
-    if (selectedProduct && selectedGlassType) {
+    if (canContinue()) {
       const thickness = getThicknessFromGlassType(selectedGlassType);
-      onProductSelect(selectedProduct, selectedGlassType, thickness);
+      
+      const extraConfig: {
+        lockType?: string;
+        frameType?: string;
+        openingSystem?: string;
+      } = {};
+      
+      if (selectedCategory === 'Puertas') {
+        extraConfig.lockType = lockType;
+        extraConfig.frameType = frameType;
+      }
+      
+      if (selectedCategory === 'Ventanas') {
+        extraConfig.frameType = frameType;
+        extraConfig.openingSystem = openingSystem;
+      }
+      
+      onProductSelect(selectedProduct, selectedGlassType, thickness, selectedCategory, extraConfig);
       onClose();
       // Reset form
-      setSelectedCategory('');
-      setSelectedProduct('');
-      setSelectedGlassType('');
-      setWidth(0);
-      setHeight(0);
+      resetForm();
     }
+  };
+
+  const resetForm = () => {
+    setSelectedCategory('');
+    setSelectedProduct('');
+    setSelectedGlassType('');
+    setWidth(0);
+    setHeight(0);
+    setLockType('');
+    setFrameType('');
+    setOpeningSystem('');
   };
 
   const handleGlassTypeChange = (glassTypeName: string) => {
@@ -67,9 +125,18 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
     setSelectedGlassType(glassTypeName);
   };
 
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setSelectedProduct('');
+    setSelectedGlassType('');
+    setLockType('');
+    setFrameType('');
+    setOpeningSystem('');
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <Settings className="h-5 w-5 mr-2 text-blue-600" />
@@ -81,7 +148,7 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
           {/* Categoría */}
           <div>
             <Label htmlFor="category">Categoría</Label>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <Select value={selectedCategory} onValueChange={handleCategoryChange}>
               <SelectTrigger id="category">
                 <SelectValue placeholder="Seleccionar categoría..." />
               </SelectTrigger>
@@ -106,7 +173,7 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                 <SelectContent>
                   {filteredProducts.map((product) => (
                     <SelectItem key={product.name} value={product.name}>
-                      {product.name} - Serie: {product.series}
+                      {product.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -114,8 +181,8 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
             </div>
           )}
 
-          {/* Selector de tipo de vidrio */}
-          {selectedCategory && availableGlassTypes.length > 0 && (
+          {/* Selector de tipo de vidrio - para todas las categorías */}
+          {selectedCategory && (
             <div>
               <Label htmlFor="glassType">Tipo de vidrio</Label>
               <Select value={selectedGlassType} onValueChange={handleGlassTypeChange}>
@@ -131,6 +198,78 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                 </SelectContent>
               </Select>
             </div>
+          )}
+
+          {/* Campos específicos para PUERTAS */}
+          {selectedCategory === 'Puertas' && (
+            <>
+              <div>
+                <Label htmlFor="lockType">Cerradura</Label>
+                <Select value={lockType} onValueChange={setLockType}>
+                  <SelectTrigger id="lockType">
+                    <SelectValue placeholder="Seleccionar tipo de cerradura..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LOCK_TYPES.map((lock) => (
+                      <SelectItem key={lock} value={lock}>
+                        {lock}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="frameType">Marco</Label>
+                <Select value={frameType} onValueChange={setFrameType}>
+                  <SelectTrigger id="frameType">
+                    <SelectValue placeholder="Seleccionar tipo de marco..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FRAME_TYPES.map((frame) => (
+                      <SelectItem key={frame} value={frame}>
+                        {frame}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+
+          {/* Campos específicos para VENTANAS */}
+          {selectedCategory === 'Ventanas' && (
+            <>
+              <div>
+                <Label htmlFor="frameTypeWindow">Tipo de marco</Label>
+                <Select value={frameType} onValueChange={setFrameType}>
+                  <SelectTrigger id="frameTypeWindow">
+                    <SelectValue placeholder="Seleccionar tipo de marco..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {FRAME_TYPES.map((frame) => (
+                      <SelectItem key={frame} value={frame}>
+                        {frame}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="openingSystem">Sistema de apertura</Label>
+                <Select value={openingSystem} onValueChange={setOpeningSystem}>
+                  <SelectTrigger id="openingSystem">
+                    <SelectValue placeholder="Seleccionar sistema de apertura..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {OPENING_SYSTEMS.map((system) => (
+                      <SelectItem key={system} value={system}>
+                        {system}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
           )}
 
           {/* Precio y dimensiones */}
@@ -193,7 +332,7 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
             </Button>
             <Button 
               onClick={handleContinue}
-              disabled={!selectedProduct || !selectedGlassType || width <= 0 || height <= 0}
+              disabled={!canContinue()}
               className="bg-blue-600 hover:bg-blue-700"
             >
               Continuar

@@ -39,7 +39,7 @@ const Index = () => {
   const [shippingService, setShippingService] = useState('');
   const [shippingCost, setShippingCost] = useState('0');
   const [travelExpenses, setTravelExpenses] = useState('0');
-  const [seller, setSeller] = useState('Carlos Porras');
+  const [seller, setSeller] = useState('');
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const { toast } = useToast();
 

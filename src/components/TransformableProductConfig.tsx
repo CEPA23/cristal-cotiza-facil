@@ -17,7 +17,9 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   onSave,
   productName,
   glassType,
-  thickness
+  thickness,
+  category,
+  extraConfig
 }) => {
   const [divisions, setDivisions] = useState(2);
   const [width, setWidth] = useState(0);
@@ -84,6 +86,7 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
       type: 'transformable',
       glassType,
       thickness,
+      category,
       configuration: {
         series: 'serie-62',
         divisions,
@@ -101,7 +104,10 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
         materialsCost,
         agreedPrice: agreedPrice > 0 ? agreedPrice : undefined,
         realProfit: agreedPrice > 0 ? realProfit : undefined,
-        realProfitPercentage: agreedPrice > 0 ? realProfitPercentage : undefined
+        realProfitPercentage: agreedPrice > 0 ? realProfitPercentage : undefined,
+        lockType: extraConfig?.lockType,
+        frameType: extraConfig?.frameType,
+        openingSystem: extraConfig?.openingSystem
       }
     };
 
