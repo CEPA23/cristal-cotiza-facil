@@ -22,7 +22,7 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
   shippingService, 
   shippingCost = 0,
   travelExpenses = 0,
-  seller = "Carlos Porras"
+  seller = ""
 }) => {
   const currentDate = new Date().toLocaleDateString('es-PE', {
     weekday: 'long',
@@ -59,18 +59,18 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
         <div className="flex items-center justify-center mb-3 print:mb-2">
           <Building2 className="h-10 w-10 text-blue-600 mr-3 print:text-black" />
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 print:text-black print:text-xl">VIDRIERÍA PROFESIONAL</h2>
+            <h2 className="text-2xl font-bold text-gray-800 print:text-black print:text-xl">VyC</h2>
             <p className="text-sm text-gray-600 print:text-black">Especialistas en Vidrio y Cristal</p>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 print:text-black print:text-xs">
           <div>
-            <p><strong>Dirección:</strong> Av. Principal 123 - Lima, Perú</p>
-            <p><strong>Teléfono:</strong> (01) 234-5678</p>
+            <p><strong>Dirección:</strong> Av. América Oeste Mz. I Lote 9</p>
+            <p>Sector Natasha Alta – Trujillo</p>
           </div>
           <div>
-            <p><strong>Email:</strong> ventas@vidrieria.pe</p>
-            <p><strong>RUC:</strong> 20123456789</p>
+            <p><strong>Teléfonos:</strong> 949320294 / 970240172</p>
+            <p><strong>Email:</strong> d.obras@vyc.pe</p>
           </div>
         </div>
       </div>
@@ -92,7 +92,7 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
           <UserCheck className="h-4 w-4 mr-2 print:h-3 print:w-3" />
           <div>
             <p className="font-semibold">Vendedor:</p>
-            <p className="text-xs">{seller}</p>
+            <p className="text-xs">{seller || 'Sin asignar'}</p>
           </div>
         </div>
       </div>
@@ -152,14 +152,23 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
                     <div className="flex-1">
                       <p className="font-medium print:text-sm">{product.name}</p>
                       <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 print:text-black mt-1">
-                        {product.type === 'transformable' ? (
+                      {product.type === 'transformable' ? (
                           <>
-                            <p>Tipo: Transformable</p>
+                            <p>Categoría: {product.category || 'Transformable'}</p>
                             <p>Cantidad: {product.quantity} unidad{product.quantity > 1 ? 'es' : ''}</p>
-                            <p>Dimensiones: {product.configuration.width}m × {product.configuration.height}m</p>
-                            <p>Área: {product.configuration.area.toFixed(2)}m²</p>
+                            {product.configuration.series !== 'none' && (
+                              <>
+                                <p>Dimensiones: {product.configuration.width}m × {product.configuration.height}m</p>
+                                <p>Área: {product.configuration.area.toFixed(2)}m²</p>
+                              </>
+                            )}
                             <p>Tipo de vidrio: {product.glassType}</p>
                             <p>Espesor: {product.thickness}mm</p>
+                            {/* Campos específicos para Puertas */}
+                            {product.lockType && <p>Cerradura: {product.lockType}</p>}
+                            {product.frameType && <p>Marco: {product.frameType}</p>}
+                            {/* Campos específicos para Ventanas */}
+                            {product.openingSystem && <p>Sistema de apertura: {product.openingSystem}</p>}
                             <p className="font-semibold text-blue-600 print:text-black">
                               Total: S/. {productTotal.toFixed(2)}
                             </p>
@@ -254,8 +263,8 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
         <p>• Se requiere adelanto del 50% para iniciar producción.</p>
         <p>• Garantía de 12 meses en productos y 6 meses en instalación.</p>
         <div className="mt-4 pt-2 border-t print:border-black">
-          <p className="font-semibold">Atendido por: {seller}</p>
-          <p>¡Gracias por confiar en nosotros!</p>
+          {seller && <p className="font-semibold">Atendido por: {seller}</p>}
+          <p>¡Gracias por confiar en VyC!</p>
         </div>
       </div>
     </div>

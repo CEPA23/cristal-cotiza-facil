@@ -39,6 +39,43 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
       openingSystem?: string;
     }
   ) => {
+    // Para Puertas y Ventanas, crear producto directamente sin configuración Serie 62
+    if (category === 'Puertas' || category === 'Ventanas') {
+      const directProduct: Product = {
+        id: Date.now().toString(),
+        name: productName,
+        type: 'transformable',
+        quantity: 1,
+        glassType,
+        thickness,
+        category: category as 'Mamparas' | 'Puertas' | 'Ventanas',
+        lockType: extraConfig?.lockType,
+        frameType: extraConfig?.frameType,
+        openingSystem: extraConfig?.openingSystem,
+        basePrice: 0,
+        unitOfMeasure: 'unidad',
+        configuration: {
+          series: 'none',
+          divisions: 0,
+          slidingPanels: 0,
+          width: 0,
+          height: 0,
+          area: 0,
+          glassArea: 0,
+          glassCostPerM2: 0,
+          glassTotalCost: 0,
+          materialsCost: 0,
+          laborCost: 0,
+          profitMargin: 0,
+          travelExpenses: 0,
+          components: []
+        }
+      };
+      onProductsChange([...products, directProduct]);
+      return;
+    }
+    
+    // Para Mamparas, continuar con configuración Serie 62
     setSelectedTransformableData({ 
       productName, 
       glassType, 

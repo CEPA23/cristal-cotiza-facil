@@ -19,8 +19,12 @@ export interface TransformableProduct extends BaseProduct {
   glassType: string;
   thickness: number; // in mm
   category?: 'Mamparas' | 'Puertas' | 'Ventanas';
+  // Campos directos para Puertas/Ventanas (sin configuración Serie 62)
+  lockType?: string;
+  frameType?: string;
+  openingSystem?: string;
   configuration: {
-    series: 'serie-62';
+    series: 'serie-62' | 'none';
     divisions: number;
     width: number;
     height: number;

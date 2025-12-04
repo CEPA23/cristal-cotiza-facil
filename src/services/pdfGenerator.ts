@@ -15,7 +15,7 @@ export interface QuoteData {
 }
 
 export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
-  const { customer, products, total, shippingService, shippingCost = 0, travelExpenses = 0, seller = "Carlos Porras", quoteId } = quoteData;
+  const { customer, products, total, shippingService, shippingCost = 0, travelExpenses = 0, seller = "", quoteId } = quoteData;
   
   const currentDate = new Date().toLocaleDateString('es-PE', {
     weekday: 'long',
@@ -43,18 +43,18 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
         <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
           <div style="width: 40px; height: 40px; background: #2563eb; border-radius: 8px; margin-right: 15px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px;">V</div>
           <div>
-            <h1 style="margin: 0; font-size: 28px; color: #1f2937;">VIDRIERÍA PROFESIONAL</h1>
+            <h1 style="margin: 0; font-size: 28px; color: #1f2937;">VyC</h1>
             <p style="margin: 5px 0 0 0; color: #6b7280; font-size: 14px;">Especialistas en Vidrio y Cristal</p>
           </div>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 12px; color: #6b7280;">
           <div style="text-align: left;">
-            <p><strong>Dirección:</strong> Av. Principal 123 - Lima, Perú</p>
-            <p><strong>Teléfono:</strong> (01) 234-5678</p>
+            <p><strong>Dirección:</strong> Av. América Oeste Mz. I Lote 9</p>
+            <p>Sector Natasha Alta – Trujillo</p>
           </div>
           <div style="text-align: right;">
-            <p><strong>Email:</strong> ventas@vidrieria.pe</p>
-            <p><strong>RUC:</strong> 20123456789</p>
+            <p><strong>Teléfonos:</strong> 949320294 / 970240172</p>
+            <p><strong>Email:</strong> d.obras@vyc.pe</p>
           </div>
         </div>
       </div>
@@ -71,7 +71,7 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
         </div>
         <div style="text-align: right;">
           <p style="margin: 0; font-weight: bold; color: #374151;">Vendedor:</p>
-          <p style="margin: 5px 0 0 0; color: #6b7280;">${seller}</p>
+          <p style="margin: 5px 0 0 0; color: #6b7280;">${seller || 'Sin asignar'}</p>
         </div>
       </div>
 
@@ -113,14 +113,25 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
                 const productTotal = calculateProductPrice(product);
                 const isTransformable = product.type === 'transformable';
                 
+                // Generar especificaciones según el tipo de producto
+                let specs = '';
+                if (isTransformable) {
+                  const specParts = [];
+                  specParts.push(`Vidrio: ${product.glassType}`);
+                  specParts.push(`Espesor: ${product.thickness}mm`);
+                  if (product.lockType) specParts.push(`Cerradura: ${product.lockType}`);
+                  if (product.frameType) specParts.push(`Marco: ${product.frameType}`);
+                  if (product.openingSystem) specParts.push(`Apertura: ${product.openingSystem}`);
+                  specs = specParts.join('<br>');
+                } else {
+                  specs = `${product.width}m × ${product.height}m<br><small style="color: #6b7280;">(${(product.width * product.height).toFixed(2)}m²)</small>`;
+                }
+                
                 return `
                   <tr style="${index % 2 === 0 ? 'background: #ffffff;' : 'background: #f9fafb;'}">
                     <td style="padding: 12px; font-size: 11px; border-bottom: 1px solid #f3f4f6;">${product.name}</td>
                     <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">
-                      ${isTransformable ? 
-                        'Configuración personalizada' : 
-                        `${product.width}m × ${product.height}m<br><small style="color: #6b7280;">(${(product.width * product.height).toFixed(2)}m²)</small>`
-                      }
+                      ${specs}
                     </td>
                     <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">${product.quantity}</td>
                     <td style="padding: 12px; text-align: center; font-size: 11px; border-bottom: 1px solid #f3f4f6;">
@@ -189,8 +200,8 @@ export const generateQuotePDF = async (quoteData: QuoteData): Promise<Blob> => {
         <p style="margin: 5px 0;">• Se requiere adelanto del 50% para iniciar producción.</p>
         <p style="margin: 5px 0;">• Garantía de 12 meses en productos y 6 meses en instalación.</p>
         <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
-          <p style="font-weight: bold; margin: 0;">Atendido por: ${seller}</p>
-          <p style="margin: 5px 0 0 0;">¡Gracias por confiar en nosotros!</p>
+          ${seller ? `<p style="font-weight: bold; margin: 0;">Atendido por: ${seller}</p>` : ''}
+          <p style="margin: 5px 0 0 0;">¡Gracias por confiar en VyC!</p>
         </div>
       </div>
     </div>
