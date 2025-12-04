@@ -50,6 +50,33 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
       const glassPrice = extraConfig?.glassPrice || 0;
       const glassTotalCost = area * glassPrice;
       
+      // Cálculos automáticos basados en el área
+      const laborCostPerM2 = 80; // S/. 80 por m² de mano de obra
+      const profitPercentage = 25; // 25% de ganancia
+      
+      // Componentes automáticos según categoría
+      const autoComponents = category === 'Puertas' 
+        ? [
+            { id: 'marco', name: 'Marco de aluminio', price: 120, quantity: 1, isSelected: true, isRequired: true, minQuantity: 1 },
+            { id: 'bisagras', name: 'Bisagras (par)', price: 45, quantity: 2, isSelected: true, isRequired: true, minQuantity: 2 },
+            { id: 'cerradura', name: 'Cerradura', price: 85, quantity: 1, isSelected: true, isRequired: true, minQuantity: 1 },
+            { id: 'manija', name: 'Manija', price: 35, quantity: 1, isSelected: true, isRequired: true, minQuantity: 1 },
+            { id: 'sellador', name: 'Sellador silicona', price: 25, quantity: 1, isSelected: true, isRequired: true, minQuantity: 1 },
+          ]
+        : [
+            { id: 'marco', name: 'Marco de aluminio', price: 100, quantity: 1, isSelected: true, isRequired: true, minQuantity: 1 },
+            { id: 'riel', name: 'Riel de aluminio', price: 60, quantity: 2, isSelected: true, isRequired: true, minQuantity: 1 },
+            { id: 'seguros', name: 'Seguros de ventana', price: 30, quantity: 2, isSelected: true, isRequired: true, minQuantity: 2 },
+            { id: 'sellador', name: 'Sellador silicona', price: 25, quantity: 1, isSelected: true, isRequired: true, minQuantity: 1 },
+          ];
+      
+      const componentsCost = autoComponents.reduce((sum, c) => sum + (c.price * c.quantity), 0);
+      const materialsCost = glassTotalCost + componentsCost;
+      const laborCost = Math.max(area * laborCostPerM2, 50); // Mínimo S/. 50
+      const subtotal = materialsCost + laborCost;
+      const profitMargin = subtotal * (profitPercentage / 100);
+      const totalPrice = subtotal + profitMargin;
+      
       const directProduct: Product = {
         id: Date.now().toString(),
         name: productName,
@@ -61,7 +88,7 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
         lockType: extraConfig?.lockType,
         frameType: extraConfig?.frameType,
         openingSystem: extraConfig?.openingSystem,
-        basePrice: glassTotalCost,
+        basePrice: totalPrice,
         unitOfMeasure: 'unidad',
         configuration: {
           series: 'none',
@@ -73,11 +100,11 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
           glassArea: area,
           glassCostPerM2: glassPrice,
           glassTotalCost: glassTotalCost,
-          materialsCost: glassTotalCost,
-          laborCost: 0,
-          profitMargin: 0,
+          materialsCost: materialsCost,
+          laborCost: laborCost,
+          profitMargin: profitMargin,
           travelExpenses: 0,
-          components: []
+          components: autoComponents
         }
       };
       onProductsChange([...products, directProduct]);
