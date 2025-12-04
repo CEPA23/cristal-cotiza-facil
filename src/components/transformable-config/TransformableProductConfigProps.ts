@@ -8,4 +8,10 @@ export interface TransformableProductConfigProps {
   productName: string;
   glassType: string;
   thickness: number;
+  category?: 'Mamparas' | 'Puertas' | 'Ventanas';
+  extraConfig?: {
+    lockType?: string;
+    frameType?: string;
+    openingSystem?: string;
+  };
 }

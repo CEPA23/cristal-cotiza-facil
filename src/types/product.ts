@@ -18,6 +18,7 @@ export interface TransformableProduct extends BaseProduct {
   type: 'transformable';
   glassType: string;
   thickness: number; // in mm
+  category?: 'Mamparas' | 'Puertas' | 'Ventanas';
   configuration: {
     series: 'serie-62';
     divisions: number;
@@ -36,6 +37,11 @@ export interface TransformableProduct extends BaseProduct {
     agreedPrice?: number;
     realProfit?: number;
     realProfitPercentage?: number;
+    // Campos para Puertas
+    lockType?: string;
+    frameType?: string;
+    // Campos para Ventanas
+    openingSystem?: string;
   };
 }
 
@@ -145,11 +151,39 @@ export const NON_TRANSFORMABLE_PRODUCTS = [
 ];
 
 export const TRANSFORMABLE_PRODUCTS = [
-  { name: 'Mampara Serie 62', series: 'serie-62' as const, category: 'Mamparas' }
+  { name: 'Mampara Serie 62', series: 'serie-62' as const, category: 'Mamparas' },
+  { name: 'Puerta de Vidrio', series: 'serie-62' as const, category: 'Puertas' },
+  { name: 'Ventana de Vidrio', series: 'serie-62' as const, category: 'Ventanas' }
 ];
 
 export const TRANSFORMABLE_CATEGORIES = [
   'Mamparas',
   'Puertas',
   'Ventanas'
+];
+
+// Opciones para Puertas
+export const LOCK_TYPES = [
+  'Cerradura de cilindro',
+  'Cerradura multipunto',
+  'Cerradura eléctrica',
+  'Cerradura magnética',
+  'Sin cerradura'
+];
+
+export const FRAME_TYPES = [
+  'Marco de aluminio',
+  'Marco de PVC',
+  'Marco de acero inoxidable',
+  'Sin marco'
+];
+
+// Opciones para Ventanas
+export const OPENING_SYSTEMS = [
+  'Corrediza',
+  'Proyectante',
+  'Batiente',
+  'Pivotante',
+  'Fija',
+  'Oscilobatiente'
 ];
