@@ -156,7 +156,7 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
                           <>
                             <p>Categoría: {product.category || 'Transformable'}</p>
                             <p>Cantidad: {product.quantity} unidad{product.quantity > 1 ? 'es' : ''}</p>
-                            {product.configuration.series !== 'none' && (
+                            {product.configuration.width > 0 && product.configuration.height > 0 && (
                               <>
                                 <p>Dimensiones: {product.configuration.width}m × {product.configuration.height}m</p>
                                 <p>Área: {product.configuration.area.toFixed(2)}m²</p>

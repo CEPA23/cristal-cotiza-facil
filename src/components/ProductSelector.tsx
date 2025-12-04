@@ -37,10 +37,19 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
       lockType?: string;
       frameType?: string;
       openingSystem?: string;
+      width?: number;
+      height?: number;
+      glassPrice?: number;
     }
   ) => {
     // Para Puertas y Ventanas, crear producto directamente sin configuración Serie 62
     if (category === 'Puertas' || category === 'Ventanas') {
+      const productWidth = extraConfig?.width || 0;
+      const productHeight = extraConfig?.height || 0;
+      const area = productWidth * productHeight;
+      const glassPrice = extraConfig?.glassPrice || 0;
+      const glassTotalCost = area * glassPrice;
+      
       const directProduct: Product = {
         id: Date.now().toString(),
         name: productName,
@@ -52,19 +61,19 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({ products, onPr
         lockType: extraConfig?.lockType,
         frameType: extraConfig?.frameType,
         openingSystem: extraConfig?.openingSystem,
-        basePrice: 0,
+        basePrice: glassTotalCost,
         unitOfMeasure: 'unidad',
         configuration: {
           series: 'none',
           divisions: 0,
           slidingPanels: 0,
-          width: 0,
-          height: 0,
-          area: 0,
-          glassArea: 0,
-          glassCostPerM2: 0,
-          glassTotalCost: 0,
-          materialsCost: 0,
+          width: productWidth,
+          height: productHeight,
+          area: area,
+          glassArea: area,
+          glassCostPerM2: glassPrice,
+          glassTotalCost: glassTotalCost,
+          materialsCost: glassTotalCost,
           laborCost: 0,
           profitMargin: 0,
           travelExpenses: 0,
