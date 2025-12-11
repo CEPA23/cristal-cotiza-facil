@@ -13,5 +13,8 @@ export interface TransformableProductConfigProps {
     lockType?: string;
     frameType?: string;
     openingSystem?: string;
+    width?: number;
+    height?: number;
+    glassPrice?: number;
   };
 }
