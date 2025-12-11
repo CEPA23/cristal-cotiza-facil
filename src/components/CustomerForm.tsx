@@ -1,10 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, Save, UserPlus } from 'lucide-react';
+import { Search, UserPlus, AlertCircle } from 'lucide-react';
 import { Customer } from '@/pages/Index';
 import { useToast } from '@/hooks/use-toast';
 
@@ -23,10 +24,59 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
     company: ''
   });
   const [isNewCustomer, setIsNewCustomer] = useState(false);
+  const [errors, setErrors] = useState<{ dni?: string; email?: string }>({});
   const { toast } = useToast();
+
+  // Validaciones
+  const validateDni = (value: string): string | undefined => {
+    if (value && !/^\d+$/.test(value)) {
+      return 'Solo se permiten números';
+    }
+    if (value && value.length > 11) {
+      return 'Máximo 11 dígitos';
+    }
+    return undefined;
+  };
+
+  const validateEmail = (value: string): string | undefined => {
+    if (value && !value.endsWith('@gmail.com')) {
+      return 'El correo debe terminar en @gmail.com';
+    }
+    return undefined;
+  };
+
+  const handleDniChange = (value: string) => {
+    // Solo permitir números y máximo 11 dígitos
+    const cleanValue = value.replace(/\D/g, '').slice(0, 11);
+    setSearchDni(cleanValue);
+    setErrors(prev => ({ ...prev, dni: validateDni(cleanValue) }));
+  };
+
+  const handleCustomerDniChange = (value: string) => {
+    const cleanValue = value.replace(/\D/g, '').slice(0, 11);
+    const error = validateDni(cleanValue);
+    setErrors(prev => ({ ...prev, dni: error }));
+    handleInputChange('dni', cleanValue);
+  };
+
+  const handleEmailChange = (value: string) => {
+    const error = validateEmail(value);
+    setErrors(prev => ({ ...prev, email: error }));
+    handleInputChange('email', value);
+  };
 
   const searchCustomer = () => {
     if (!searchDni) return;
+
+    const dniError = validateDni(searchDni);
+    if (dniError) {
+      toast({
+        title: "Error de validación",
+        description: dniError,
+        variant: "destructive"
+      });
+      return;
+    }
 
     // Buscar en localStorage
     const customers = JSON.parse(localStorage.getItem('customers') || '[]');
@@ -58,6 +108,13 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent, action: () => void) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      action();
+    }
+  };
+
   const saveCustomer = () => {
     if (!customer.dni || !customer.name || !customer.phone) {
       toast({
@@ -66,6 +123,19 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
         variant: "destructive"
       });
       return;
+    }
+
+    // Validar email si está presente
+    if (customer.email) {
+      const emailError = validateEmail(customer.email);
+      if (emailError) {
+        toast({
+          title: "Error de validación",
+          description: emailError,
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     const customers = JSON.parse(localStorage.getItem('customers') || '[]');
@@ -103,10 +173,17 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
           <Input
             id="search-dni"
             value={searchDni}
-            onChange={(e) => setSearchDni(e.target.value)}
-            placeholder="Ingresa DNI o RUC"
+            onChange={(e) => handleDniChange(e.target.value)}
+            onKeyDown={(e) => handleKeyDown(e, searchCustomer)}
+            placeholder="Ingresa DNI o RUC (máx. 11 dígitos)"
             maxLength={11}
           />
+          {errors.dni && (
+            <p className="text-xs text-red-500 mt-1 flex items-center">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              {errors.dni}
+            </p>
+          )}
         </div>
         <div className="flex items-end">
           <Button onClick={searchCustomer}>
@@ -125,10 +202,17 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
                 <Input
                   id="dni"
                   value={customer.dni}
-                  onChange={(e) => handleInputChange('dni', e.target.value)}
-                  placeholder="DNI o RUC"
+                  onChange={(e) => handleCustomerDniChange(e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, saveCustomer)}
+                  placeholder="DNI o RUC (máx. 11 dígitos)"
                   maxLength={11}
                 />
+                {errors.dni && (
+                  <p className="text-xs text-red-500 mt-1 flex items-center">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {errors.dni}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="name">Nombre Completo *</Label>
@@ -136,6 +220,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
                   id="name"
                   value={customer.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, saveCustomer)}
                   placeholder="Nombre completo o razón social"
                 />
               </div>
@@ -145,6 +230,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
                   id="phone"
                   value={customer.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, saveCustomer)}
                   placeholder="Número de teléfono"
                 />
               </div>
@@ -154,9 +240,16 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
                   id="email"
                   type="email"
                   value={customer.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  placeholder="correo@ejemplo.com"
+                  onChange={(e) => handleEmailChange(e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, saveCustomer)}
+                  placeholder="correo@gmail.com"
                 />
+                {errors.email && (
+                  <p className="text-xs text-red-500 mt-1 flex items-center">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {errors.email}
+                  </p>
+                )}
               </div>
               <div className="md:col-span-2">
                 <Label htmlFor="address">Dirección</Label>
@@ -164,6 +257,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
                   id="address"
                   value={customer.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, saveCustomer)}
                   placeholder="Dirección completa"
                 />
               </div>
@@ -173,6 +267,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
                   id="company"
                   value={customer.company}
                   onChange={(e) => handleInputChange('company', e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(e, saveCustomer)}
                   placeholder="Nombre de la empresa"
                 />
               </div>
