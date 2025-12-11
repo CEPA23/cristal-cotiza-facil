@@ -26,9 +26,9 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   const [height, setHeight] = useState(extraConfig?.height || 0);
   const [slidingPanels, setSlidingPanels] = useState(2);
   const [quantity, setQuantity] = useState(1);
-  const [laborCost, setLaborCost] = useState(category === 'Ventanas' ? (extraConfig?.laborCost || 80) : 200);
-  const [profitMarginPercentage, setProfitMarginPercentage] = useState(20);
-  const [travelExpenses, setTravelExpenses] = useState(category === 'Ventanas' ? (extraConfig?.travelCost || 30) : 0);
+  const [laborCost, setLaborCost] = useState(extraConfig?.laborCost || (category === 'Ventanas' ? 0 : 200));
+  const [profitMarginPercentage, setProfitMarginPercentage] = useState(category === 'Ventanas' ? 0 : 20);
+  const [travelExpenses, setTravelExpenses] = useState(extraConfig?.travelCost || 0);
   const [agreedPrice, setAgreedPrice] = useState<number>(0);
 
   // Actualizar dimensiones cuando cambie extraConfig
