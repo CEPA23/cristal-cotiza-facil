@@ -16,5 +16,7 @@ export interface TransformableProductConfigProps {
     width?: number;
     height?: number;
     glassPrice?: number;
+    laborCost?: number;
+    travelCost?: number;
   };
 }

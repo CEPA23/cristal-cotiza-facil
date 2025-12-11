@@ -13,7 +13,8 @@ import {
   MAMPARA_GLASS_PRICES,
   FRAME_TYPES,
   OPENING_SYSTEMS,
-  SERIE_62_COMPONENTS
+  WINDOW_LABOR_COST,
+  WINDOW_TRAVEL_COST
 } from '@/types/product';
 
 interface TransformableProductSelectorProps {
@@ -26,6 +27,8 @@ interface TransformableProductSelectorProps {
     width?: number;
     height?: number;
     glassPrice?: number;
+    laborCost?: number;
+    travelCost?: number;
   }) => void;
 }
 
@@ -42,8 +45,9 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
   
   // Campos para Ventanas
   const [frameType, setFrameType] = useState('');
-  // Campos para Ventanas
   const [openingSystem, setOpeningSystem] = useState('');
+  const [laborCost, setLaborCost] = useState(WINDOW_LABOR_COST);
+  const [travelCost, setTravelCost] = useState(WINDOW_TRAVEL_COST);
 
   const filteredProducts = selectedCategory 
     ? TRANSFORMABLE_PRODUCTS.filter(product => product.category === selectedCategory)
@@ -91,6 +95,8 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
         width?: number;
         height?: number;
         glassPrice?: number;
+        laborCost?: number;
+        travelCost?: number;
       } = {
         width,
         height,
@@ -100,6 +106,8 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
       if (selectedCategory === 'Ventanas') {
         extraConfig.frameType = frameType;
         extraConfig.openingSystem = openingSystem;
+        extraConfig.laborCost = laborCost;
+        extraConfig.travelCost = travelCost;
       }
       
       onProductSelect(selectedProduct, selectedGlassType, thickness, selectedCategory, extraConfig);
@@ -116,8 +124,9 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
     setWidth(0);
     setHeight(0);
     setFrameType('');
-    setFrameType('');
     setOpeningSystem('');
+    setLaborCost(WINDOW_LABOR_COST);
+    setTravelCost(WINDOW_TRAVEL_COST);
   };
 
   const handleGlassTypeChange = (glassTypeName: string) => {
@@ -130,8 +139,9 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
     setSelectedProduct('');
     setSelectedGlassType('');
     setFrameType('');
-    setFrameType('');
     setOpeningSystem('');
+    setLaborCost(WINDOW_LABOR_COST);
+    setTravelCost(WINDOW_TRAVEL_COST);
   };
 
   return (
@@ -211,8 +221,8 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                   </SelectTrigger>
                   <SelectContent>
                     {FRAME_TYPES.map((frame) => (
-                      <SelectItem key={frame} value={frame}>
-                        {frame}
+                      <SelectItem key={frame.name} value={frame.name}>
+                        {frame.name} - S/. {frame.price}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -226,24 +236,68 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                   </SelectTrigger>
                   <SelectContent>
                     {OPENING_SYSTEMS.map((system) => (
-                      <SelectItem key={system} value={system}>
-                        {system}
+                      <SelectItem key={system.name} value={system.name}>
+                        {system.name} - S/. {system.price}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               
-              {/* Precios de componentes para Ventanas */}
+              {/* Mano de obra y viáticos */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="laborCost">Mano de obra (S/.)</Label>
+                  <Input
+                    id="laborCost"
+                    type="number"
+                    min="0"
+                    value={laborCost}
+                    onChange={(e) => setLaborCost(parseInt(e.target.value) || 0)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="travelCost">Viáticos (S/.)</Label>
+                  <Input
+                    id="travelCost"
+                    type="number"
+                    min="0"
+                    value={travelCost}
+                    onChange={(e) => setTravelCost(parseInt(e.target.value) || 0)}
+                  />
+                </div>
+              </div>
+              
+              {/* Resumen de precios para Ventanas */}
               <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                <Label className="text-sm font-medium text-amber-800 mb-2 block">Precios de componentes (Serie 62)</Label>
-                <div className="grid grid-cols-2 gap-2 text-xs text-amber-700">
-                  {SERIE_62_COMPONENTS.map((comp, index) => (
-                    <div key={index} className="flex justify-between">
-                      <span>{comp.name}</span>
-                      <span className="font-medium">S/. {comp.price}</span>
+                <Label className="text-sm font-medium text-amber-800 mb-2 block">Precios unitarios</Label>
+                <div className="space-y-1 text-sm text-amber-700">
+                  {selectedGlassType && (
+                    <div className="flex justify-between">
+                      <span>Vidrio ({selectedGlassType})</span>
+                      <span className="font-medium">S/. {getGlassPrice()} /m²</span>
                     </div>
-                  ))}
+                  )}
+                  {frameType && (
+                    <div className="flex justify-between">
+                      <span>Marco ({frameType})</span>
+                      <span className="font-medium">S/. {FRAME_TYPES.find(f => f.name === frameType)?.price || 0}</span>
+                    </div>
+                  )}
+                  {openingSystem && (
+                    <div className="flex justify-between">
+                      <span>Sistema ({openingSystem})</span>
+                      <span className="font-medium">S/. {OPENING_SYSTEMS.find(s => s.name === openingSystem)?.price || 0}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span>Mano de obra</span>
+                    <span className="font-medium">S/. {laborCost}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Viáticos</span>
+                    <span className="font-medium">S/. {travelCost}</span>
+                  </div>
                 </div>
               </div>
             </>
