@@ -42,11 +42,10 @@ export const ComponentsSelectionCard: React.FC<ComponentsSelectionCardProps> = (
                 <Input
                   id={`price-${component.id}`}
                   type="number"
-                  step="0.01"
                   min="0"
                   value={component.price}
                   onChange={(e) => 
-                    onComponentChange(component.id, 'price', parseFloat(e.target.value) || 0)
+                    onComponentChange(component.id, 'price', parseInt(e.target.value) || 0)
                   }
                   className="w-20"
                   disabled={!component.isSelected}

@@ -22,14 +22,20 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   extraConfig
 }) => {
   const [divisions, setDivisions] = useState(2);
-  const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
+  const [width, setWidth] = useState(extraConfig?.width || 0);
+  const [height, setHeight] = useState(extraConfig?.height || 0);
   const [slidingPanels, setSlidingPanels] = useState(2);
   const [quantity, setQuantity] = useState(1);
   const [laborCost, setLaborCost] = useState(200);
   const [profitMarginPercentage, setProfitMarginPercentage] = useState(20);
   const [travelExpenses, setTravelExpenses] = useState(0);
   const [agreedPrice, setAgreedPrice] = useState<number>(0);
+
+  // Actualizar dimensiones cuando cambie extraConfig
+  useEffect(() => {
+    if (extraConfig?.width) setWidth(extraConfig.width);
+    if (extraConfig?.height) setHeight(extraConfig.height);
+  }, [extraConfig?.width, extraConfig?.height]);
   const [components, setComponents] = useState(
     SERIE_62_COMPONENTS.map((comp, index) => ({
       ...comp,
@@ -252,10 +258,9 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                 <Input
                   id="labor-cost"
                   type="number"
-                  step="0.01"
                   min="0"
                   value={laborCost}
-                  onChange={(e) => setLaborCost(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setLaborCost(parseInt(e.target.value) || 0)}
                 />
               </div>
               <div>
@@ -263,11 +268,10 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                 <Input
                   id="profit-margin"
                   type="number"
-                  step="0.1"
                   min="0"
                   max="100"
                   value={profitMarginPercentage}
-                  onChange={(e) => setProfitMarginPercentage(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setProfitMarginPercentage(parseInt(e.target.value) || 0)}
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Calculado sobre el total general
@@ -278,10 +282,9 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                 <Input
                   id="travel-expenses"
                   type="number"
-                  step="0.01"
                   min="0"
                   value={travelExpenses}
-                  onChange={(e) => setTravelExpenses(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setTravelExpenses(parseInt(e.target.value) || 0)}
                 />
               </div>
             </CardContent>
@@ -348,10 +351,9 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                 <Input
                   id="agreed-price"
                   type="number"
-                  step="0.01"
                   min="0"
                   value={agreedPrice}
-                  onChange={(e) => setAgreedPrice(parseFloat(e.target.value) || 0)}
+                  onChange={(e) => setAgreedPrice(parseInt(e.target.value) || 0)}
                   placeholder="Dejar en blanco para usar el total general"
                 />
               </div>
