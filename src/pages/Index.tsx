@@ -40,6 +40,7 @@ const Index = () => {
   const [shippingCost, setShippingCost] = useState('0');
   const [travelExpenses, setTravelExpenses] = useState('0');
   const [seller, setSeller] = useState('');
+  const [validityDays, setValidityDays] = useState('30');
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const { toast } = useToast();
 
@@ -451,7 +452,19 @@ Te envío la cotización de vidriería:
                       className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
                     />
                   </div>
-                  
+                  <div>
+                    <Label htmlFor="validity-days">Validez (días)</Label>
+                    <Input
+                      id="validity-days"
+                      type="number"
+                      min="1"
+                      max="365"
+                      value={validityDays}
+                      onChange={(e) => setValidityDays(e.target.value)}
+                      placeholder="30"
+                      className="bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all duration-200"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -472,6 +485,7 @@ Te envío la cotización de vidriería:
                     shippingCost={parseFloat(shippingCost || '0')}
                     travelExpenses={parseFloat(travelExpenses || '0')}
                     seller={seller}
+                    validityDays={parseInt(validityDays) || 30}
                   />
                 </div>
               </CardContent>

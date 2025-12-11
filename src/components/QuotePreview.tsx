@@ -13,6 +13,7 @@ interface QuotePreviewProps {
   shippingCost?: number;
   travelExpenses?: number;
   seller?: string;
+  validityDays?: number;
 }
 
 export const QuotePreview: React.FC<QuotePreviewProps> = ({ 
@@ -22,7 +23,8 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
   shippingService, 
   shippingCost = 0,
   travelExpenses = 0,
-  seller = ""
+  seller = "",
+  validityDays = 30
 }) => {
   const currentDate = new Date().toLocaleDateString('es-PE', {
     weekday: 'long',
@@ -257,7 +259,7 @@ export const QuotePreview: React.FC<QuotePreviewProps> = ({
 
       {/* Footer - Mejorado para impresión */}
       <div className="text-xs text-gray-500 pt-4 border-t space-y-1 print:text-black print:border-black print:text-xs">
-        <p>• Esta cotización tiene validez de 30 días calendario.</p>
+        <p className="font-semibold text-red-600 print:text-black">• Esta cotización tiene validez de {validityDays} días calendario.</p>
         <p>• Los precios incluyen IGV (18%).</p>
         <p>• Tiempo de entrega: 7 a 15 días hábiles desde la confirmación del pedido.</p>
         <p>• Se requiere adelanto del 50% para iniciar producción.</p>

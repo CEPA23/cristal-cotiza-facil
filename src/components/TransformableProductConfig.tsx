@@ -337,14 +337,14 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
             </CardContent>
           </Card>
 
-          {/* Precio Pactado */}
+          {/* Descuento */}
           <Card>
             <CardHeader>
-              <CardTitle>Precio Pactado (Opcional)</CardTitle>
+              <CardTitle>Descuento (Opcional)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="agreed-price">Precio Pactado (S/.)</Label>
+                <Label htmlFor="agreed-price">Precio con Descuento (S/.)</Label>
                 <Input
                   id="agreed-price"
                   type="number"
@@ -367,8 +367,12 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
                       <span>S/. {baseCostWithoutProfit.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Precio Pactado:</span>
+                      <span>Precio con Descuento:</span>
                       <span>S/. {agreedPrice.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-blue-600">
+                      <span>Descuento aplicado:</span>
+                      <span>S/. {(totalWithProfit - agreedPrice).toFixed(2)} ({((totalWithProfit - agreedPrice) / totalWithProfit * 100).toFixed(1)}%)</span>
                     </div>
                     <div className={`flex justify-between font-medium ${isLoss ? 'text-red-700' : 'text-green-700'}`}>
                       <span>{isLoss ? 'Pérdida' : 'Ganancia'} Real:</span>
