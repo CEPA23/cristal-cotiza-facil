@@ -348,7 +348,27 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                   <div className="mt-3 p-3 bg-green-50 rounded-lg">
                     <div className="text-sm space-y-1">
                       <p><span className="font-medium">Área:</span> {(width * height).toFixed(2)} m²</p>
-                      <p><span className="font-medium">Precio total:</span> S/. {(width * height * getGlassPrice()).toFixed(2)}</p>
+                      {selectedCategory === 'Ventanas' ? (
+                        <>
+                          <p><span className="font-medium">Costo vidrio:</span> S/. {Math.round(width * height * getGlassPrice())}</p>
+                          <p><span className="font-medium">Costo marco:</span> S/. {FRAME_TYPES.find(f => f.name === frameType)?.price || 0}</p>
+                          <p><span className="font-medium">Costo sistema:</span> S/. {OPENING_SYSTEMS.find(s => s.name === openingSystem)?.price || 0}</p>
+                          <p><span className="font-medium">Mano de obra:</span> S/. {laborCost}</p>
+                          <p><span className="font-medium">Viáticos:</span> S/. {travelCost}</p>
+                          <hr className="my-2 border-green-300" />
+                          <p className="text-base font-bold text-green-800">
+                            Total: S/. {Math.round(
+                              (width * height * getGlassPrice()) + 
+                              (FRAME_TYPES.find(f => f.name === frameType)?.price || 0) + 
+                              (OPENING_SYSTEMS.find(s => s.name === openingSystem)?.price || 0) + 
+                              laborCost + 
+                              travelCost
+                            )}
+                          </p>
+                        </>
+                      ) : (
+                        <p><span className="font-medium">Precio total:</span> S/. {Math.round(width * height * getGlassPrice())}</p>
+                      )}
                     </div>
                   </div>
                 )}
