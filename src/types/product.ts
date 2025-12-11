@@ -174,18 +174,22 @@ export const LOCK_TYPES = [
 ];
 
 export const FRAME_TYPES = [
-  'Marco de aluminio',
-  'Marco de PVC',
-  'Marco de acero inoxidable',
-  'Sin marco'
+  { name: 'Marco de aluminio', price: 45 },
+  { name: 'Marco de PVC', price: 35 },
+  { name: 'Marco de acero inoxidable', price: 80 },
+  { name: 'Sin marco', price: 0 }
 ];
 
 // Opciones para Ventanas
 export const OPENING_SYSTEMS = [
-  'Corrediza',
-  'Proyectante',
-  'Batiente',
-  'Pivotante',
-  'Fija',
-  'Oscilobatiente'
+  { name: 'Corrediza', price: 60 },
+  { name: 'Proyectante', price: 75 },
+  { name: 'Batiente', price: 55 },
+  { name: 'Pivotante', price: 70 },
+  { name: 'Fija', price: 30 },
+  { name: 'Oscilobatiente', price: 90 }
 ];
+
+// Precios base para mano de obra y viáticos
+export const WINDOW_LABOR_COST = 80;
+export const WINDOW_TRAVEL_COST = 30;
