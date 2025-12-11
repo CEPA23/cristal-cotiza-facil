@@ -24,7 +24,7 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
     company: ''
   });
   const [isNewCustomer, setIsNewCustomer] = useState(false);
-  const [errors, setErrors] = useState<{ dni?: string; email?: string }>({});
+  const [errors, setErrors] = useState<{ dni?: string; email?: string; phone?: string }>({});
   const { toast } = useToast();
 
   // Validaciones
@@ -43,6 +43,23 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
       return 'El correo debe terminar en @gmail.com';
     }
     return undefined;
+  };
+
+  const validatePhone = (value: string): string | undefined => {
+    if (value && !/^\d+$/.test(value)) {
+      return 'Solo se permiten números';
+    }
+    if (value && value.length !== 9 && value.length > 0) {
+      return 'Debe tener exactamente 9 dígitos';
+    }
+    return undefined;
+  };
+
+  const handlePhoneChange = (value: string) => {
+    const cleanValue = value.replace(/\D/g, '').slice(0, 9);
+    const error = validatePhone(cleanValue);
+    setErrors(prev => ({ ...prev, phone: error }));
+    handleInputChange('phone', cleanValue);
   };
 
   const handleDniChange = (value: string) => {
@@ -138,6 +155,17 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
       }
     }
 
+    // Validar teléfono
+    const phoneError = validatePhone(customer.phone);
+    if (phoneError) {
+      toast({
+        title: "Error de validación",
+        description: phoneError,
+        variant: "destructive"
+      });
+      return;
+    }
+
     const customers = JSON.parse(localStorage.getItem('customers') || '[]');
     const existingIndex = customers.findIndex((c: Customer) => c.dni === customer.dni);
 
@@ -229,10 +257,17 @@ export const CustomerForm: React.FC<CustomerFormProps> = ({ onCustomerSelect }) 
                 <Input
                   id="phone"
                   value={customer.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
                   onKeyDown={(e) => handleKeyDown(e, saveCustomer)}
-                  placeholder="Número de teléfono"
+                  placeholder="9 dígitos"
+                  maxLength={9}
                 />
+                {errors.phone && (
+                  <p className="text-xs text-red-500 mt-1 flex items-center">
+                    <AlertCircle className="h-3 w-3 mr-1" />
+                    {errors.phone}
+                  </p>
+                )}
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
