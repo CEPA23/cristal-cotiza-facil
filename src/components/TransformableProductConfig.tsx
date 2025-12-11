@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Calculator, Save } from 'lucide-react';
-import { TransformableProduct, SERIE_62_COMPONENTS, MAMPARA_GLASS_PRICES } from '@/types/product';
+import { TransformableProduct, SERIE_62_COMPONENTS, MAMPARA_GLASS_PRICES, FRAME_TYPES, OPENING_SYSTEMS } from '@/types/product';
 import { TransformableProductConfigProps } from './transformable-config/TransformableProductConfigProps';
 import { ComponentsSelectionCard } from './transformable-config/ComponentsSelectionCard';
 
@@ -26,16 +26,19 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   const [height, setHeight] = useState(extraConfig?.height || 0);
   const [slidingPanels, setSlidingPanels] = useState(2);
   const [quantity, setQuantity] = useState(1);
-  const [laborCost, setLaborCost] = useState(200);
+  const [laborCost, setLaborCost] = useState(category === 'Ventanas' ? (extraConfig?.laborCost || 80) : 200);
   const [profitMarginPercentage, setProfitMarginPercentage] = useState(20);
-  const [travelExpenses, setTravelExpenses] = useState(0);
+  const [travelExpenses, setTravelExpenses] = useState(category === 'Ventanas' ? (extraConfig?.travelCost || 30) : 0);
   const [agreedPrice, setAgreedPrice] = useState<number>(0);
 
   // Actualizar dimensiones cuando cambie extraConfig
   useEffect(() => {
     if (extraConfig?.width) setWidth(extraConfig.width);
     if (extraConfig?.height) setHeight(extraConfig.height);
-  }, [extraConfig?.width, extraConfig?.height]);
+    if (extraConfig?.laborCost) setLaborCost(extraConfig.laborCost);
+    if (extraConfig?.travelCost) setTravelExpenses(extraConfig.travelCost);
+  }, [extraConfig?.width, extraConfig?.height, extraConfig?.laborCost, extraConfig?.travelCost]);
+
   const [components, setComponents] = useState(
     SERIE_62_COMPONENTS.map((comp, index) => ({
       ...comp,
@@ -49,11 +52,24 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
   const glassCostPerM2 = MAMPARA_GLASS_PRICES[glassType] || 0;
   const glassTotalCost = glassArea * glassCostPerM2;
   
-  const componentsSubtotal = components
-    .filter(comp => comp.isSelected)
-    .reduce((sum, comp) => sum + (comp.price * comp.quantity), 0);
+  // Para Ventanas: usar precios de marco y sistema de apertura
+  const framePrice = category === 'Ventanas' 
+    ? (FRAME_TYPES.find(f => f.name === extraConfig?.frameType)?.price || 0)
+    : 0;
+  const openingSystemPrice = category === 'Ventanas'
+    ? (OPENING_SYSTEMS.find(s => s.name === extraConfig?.openingSystem)?.price || 0)
+    : 0;
   
-  const materialsCost = componentsSubtotal + glassTotalCost;
+  // Cálculo de componentes solo para mamparas
+  const componentsSubtotal = category === 'Mamparas'
+    ? components.filter(comp => comp.isSelected).reduce((sum, comp) => sum + (comp.price * comp.quantity), 0)
+    : 0;
+  
+  // Para Ventanas: vidrio + marco + sistema
+  // Para Mamparas: componentes + vidrio
+  const materialsCost = category === 'Ventanas'
+    ? glassTotalCost + framePrice + openingSystemPrice
+    : componentsSubtotal + glassTotalCost;
   
   // Costo base sin ganancia (materiales + mano de obra + viáticos)
   const baseCostWithoutProfit = materialsCost + laborCost + travelExpenses;
@@ -241,11 +257,13 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
             </CardContent>
           </Card>
 
-          {/* Componentes */}
-          <ComponentsSelectionCard
-            components={components}
-            onComponentChange={handleComponentChange}
-          />
+          {/* Componentes - Solo para Mamparas */}
+          {category === 'Mamparas' && (
+            <ComponentsSelectionCard
+              components={components}
+              onComponentChange={handleComponentChange}
+            />
+          )}
 
           {/* Costos Adicionales */}
           <Card>
@@ -297,44 +315,58 @@ export const TransformableProductConfig: React.FC<TransformableProductConfigProp
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex justify-between">
-                  <span>Componentes:</span>
-                  <span>S/. {componentsSubtotal.toFixed(2)}</span>
-                </div>
+                {category === 'Mamparas' && (
+                  <div className="flex justify-between">
+                    <span>Componentes:</span>
+                    <span>S/. {Math.round(componentsSubtotal)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Vidrio:</span>
-                  <span>S/. {glassTotalCost.toFixed(2)}</span>
+                  <span>S/. {Math.round(glassTotalCost)}</span>
                 </div>
+                {category === 'Ventanas' && (
+                  <>
+                    <div className="flex justify-between">
+                      <span>Marco ({extraConfig?.frameType}):</span>
+                      <span>S/. {framePrice}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Sistema ({extraConfig?.openingSystem}):</span>
+                      <span>S/. {openingSystemPrice}</span>
+                    </div>
+                  </>
+                )}
                 <div className="flex justify-between font-medium">
                   <span>Total Materiales:</span>
-                  <span>S/. {materialsCost.toFixed(2)}</span>
+                  <span>S/. {Math.round(materialsCost)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Mano de Obra:</span>
-                  <span>S/. {laborCost.toFixed(2)}</span>
+                  <span>S/. {laborCost}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Viáticos:</span>
-                  <span>S/. {travelExpenses.toFixed(2)}</span>
+                  <span>S/. {travelExpenses}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Ganancia ({profitMarginPercentage}%):</span>
-                  <span>S/. {profitMarginAmount.toFixed(2)}</span>
+                  <span>S/. {Math.round(profitMarginAmount)}</span>
                 </div>
               </div>
               <Separator />
               <div className="space-y-2">
                 <div className="flex justify-between text-sm font-medium text-gray-600">
                   <span>Costo Base (sin ganancia):</span>
-                  <span>S/. {baseCostWithoutProfit.toFixed(2)}</span>
+                  <span>S/. {Math.round(baseCostWithoutProfit)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold text-blue-600">
                   <span>Precio por Unidad:</span>
-                  <span>S/. {pricePerUnit.toFixed(2)}</span>
+                  <span>S/. {Math.round(pricePerUnit)}</span>
                 </div>
                 <div className="flex justify-between text-xl font-bold text-green-600 bg-green-50 p-3 rounded-lg">
                   <span>Total por {quantity} unidad{quantity > 1 ? 'es' : ''}:</span>
-                  <span>S/. {totalForQuantity.toFixed(2)}</span>
+                  <span>S/. {Math.round(totalForQuantity)}</span>
                 </div>
               </div>
             </CardContent>
