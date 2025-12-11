@@ -11,9 +11,9 @@ import {
   TRANSFORMABLE_CATEGORIES, 
   MAMPARA_GLASS_TYPES, 
   MAMPARA_GLASS_PRICES,
-  LOCK_TYPES,
   FRAME_TYPES,
-  OPENING_SYSTEMS
+  OPENING_SYSTEMS,
+  SERIE_62_COMPONENTS
 } from '@/types/product';
 
 interface TransformableProductSelectorProps {
@@ -40,10 +40,8 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
   
-  // Campos para Puertas
-  const [lockType, setLockType] = useState('');
+  // Campos para Ventanas
   const [frameType, setFrameType] = useState('');
-  
   // Campos para Ventanas
   const [openingSystem, setOpeningSystem] = useState('');
 
@@ -74,10 +72,6 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
     }
     
     // Validaciones específicas por categoría
-    if (selectedCategory === 'Puertas' && (!lockType || !frameType)) {
-      return false;
-    }
-    
     if (selectedCategory === 'Ventanas' && (!frameType || !openingSystem)) {
       return false;
     }
@@ -103,11 +97,6 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
         glassPrice
       };
       
-      if (selectedCategory === 'Puertas') {
-        extraConfig.lockType = lockType;
-        extraConfig.frameType = frameType;
-      }
-      
       if (selectedCategory === 'Ventanas') {
         extraConfig.frameType = frameType;
         extraConfig.openingSystem = openingSystem;
@@ -126,7 +115,7 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
     setSelectedGlassType('');
     setWidth(0);
     setHeight(0);
-    setLockType('');
+    setFrameType('');
     setFrameType('');
     setOpeningSystem('');
   };
@@ -140,7 +129,7 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
     setSelectedCategory(category);
     setSelectedProduct('');
     setSelectedGlassType('');
-    setLockType('');
+    setFrameType('');
     setFrameType('');
     setOpeningSystem('');
   };
@@ -211,42 +200,6 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
             </div>
           )}
 
-          {/* Campos específicos para PUERTAS */}
-          {selectedCategory === 'Puertas' && (
-            <>
-              <div>
-                <Label htmlFor="lockType">Cerradura</Label>
-                <Select value={lockType} onValueChange={setLockType}>
-                  <SelectTrigger id="lockType">
-                    <SelectValue placeholder="Seleccionar tipo de cerradura..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LOCK_TYPES.map((lock) => (
-                      <SelectItem key={lock} value={lock}>
-                        {lock}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="frameType">Marco</Label>
-                <Select value={frameType} onValueChange={setFrameType}>
-                  <SelectTrigger id="frameType">
-                    <SelectValue placeholder="Seleccionar tipo de marco..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FRAME_TYPES.map((frame) => (
-                      <SelectItem key={frame} value={frame}>
-                        {frame}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
-
           {/* Campos específicos para VENTANAS */}
           {selectedCategory === 'Ventanas' && (
             <>
@@ -279,6 +232,19 @@ export const TransformableProductSelector: React.FC<TransformableProductSelector
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              
+              {/* Precios de componentes para Ventanas */}
+              <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                <Label className="text-sm font-medium text-amber-800 mb-2 block">Precios de componentes (Serie 62)</Label>
+                <div className="grid grid-cols-2 gap-2 text-xs text-amber-700">
+                  {SERIE_62_COMPONENTS.map((comp, index) => (
+                    <div key={index} className="flex justify-between">
+                      <span>{comp.name}</span>
+                      <span className="font-medium">S/. {comp.price}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </>
           )}

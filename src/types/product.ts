@@ -62,17 +62,17 @@ export interface Serie62Component {
 export type Product = NonTransformableProduct | TransformableProduct;
 
 export const SERIE_62_COMPONENTS: Omit<Serie62Component, 'id' | 'isSelected'>[] = [
-  { name: 'Marco Doble', price: 45.00, quantity: 1 },
-  { name: 'Traslape', price: 25.00, quantity: 1 },
-  { name: 'Marco de hoja', price: 35.00, quantity: 1 },
-  { name: 'Garrucha simple', price: 15.00, quantity: 4 },
-  { name: 'Guía', price: 30.00, quantity: 2 },
-  { name: 'Manija redonda', price: 20.00, quantity: 2 },
-  { name: 'Cremona', price: 40.00, quantity: 1 },
-  { name: 'Silicona', price: 12.00, quantity: 1 },
-  { name: 'Felpa (Flo/Fs)', price: 8.00, quantity: 2 },
-  { name: 'Ensamblaje', price: 150.00, quantity: 1 },
-  { name: 'Ángulos Martinelli', price: 5.00, quantity: 4, minQuantity: 4, isRequired: true }
+  { name: 'Marco Doble', price: 18, quantity: 1 },
+  { name: 'Traslape', price: 12, quantity: 1 },
+  { name: 'Marco de hoja', price: 15, quantity: 1 },
+  { name: 'Garrucha simple', price: 8, quantity: 4 },
+  { name: 'Guía', price: 14, quantity: 2 },
+  { name: 'Manija redonda', price: 10, quantity: 2 },
+  { name: 'Cremona', price: 22, quantity: 1 },
+  { name: 'Silicona', price: 6, quantity: 1 },
+  { name: 'Felpa (Flo/Fs)', price: 4, quantity: 2 },
+  { name: 'Ensamblaje', price: 50, quantity: 1 },
+  { name: 'Ángulos Martinelli', price: 3, quantity: 4, minQuantity: 4, isRequired: true }
 ];
 
 // Tipos de vidrio específicos para mamparas con formato correcto
@@ -156,13 +156,11 @@ export const NON_TRANSFORMABLE_PRODUCTS = [
 
 export const TRANSFORMABLE_PRODUCTS = [
   { name: 'Mampara Serie 62', series: 'serie-62' as const, category: 'Mamparas' },
-  { name: 'Puerta de Vidrio', series: 'serie-62' as const, category: 'Puertas' },
   { name: 'Ventana de Vidrio', series: 'serie-62' as const, category: 'Ventanas' }
 ];
 
 export const TRANSFORMABLE_CATEGORIES = [
   'Mamparas',
-  'Puertas',
   'Ventanas'
 ];
 
